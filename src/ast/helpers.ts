@@ -4,6 +4,7 @@ import { FileMapper } from "./FileMapper";
 import { readFileSync } from "fs";
 import * as util from "util";
 import * as path from "path";
+import { globSync } from "glob";
 
 let KIND_TO_SCOPE_TYPE = new Map<
     ts.SyntaxKind,
@@ -98,17 +99,47 @@ function modifierlistToModifierSet(
     return tor;
 }
 
+function paramDeclListToIParams(
+    p: ts.NodeArray<ts.ParameterDeclaration>,
+    checker: ts.TypeChecker
+): autouml.mapping.IParam[] {
+    let tor: autouml.mapping.IParam[] = [];
+    tor = p.map((x): autouml.mapping.IParam => {
+        let t: string = "any";
+        let tt = x.type;
+        if (tt) {
+            t = checker.typeToString(
+                checker.getTypeAtLocation(tt)
+            );
+        }
+
+        return {
+            name: x.name.getText(),
+            type: t,
+        };
+    });
+    return tor;
+}
+
 function mapFiles(
-    files: string[],
+    inputPaths: string[],
     options: ts.CompilerOptions
 ): autouml.mapping.IScope {
+    let fileMap = new Map<string, boolean>();
+    let files: string[] = [];
+    for (let p of inputPaths) {
+        let fils = globSync(p, {
+            ignore: "node_modules/**",
+        });
+        for (let f of fils) {
+            files.push(f);
+            fileMap.set(path.resolve(f), true);
+        }
+    }
     let mapper = new FileMapper();
     let program = ts.createProgram(files, options);
     let checker = program.getTypeChecker();
-    let fileMap = new Map<string, boolean>();
-    for (let f of files) {
-        fileMap.set(path.resolve(f), true);
-    }
+
     program.getSourceFiles().forEach((sourceFile) => {
         // let sourceFile = ts.createSourceFile(
         //     fileName,
@@ -123,9 +154,12 @@ function mapFiles(
                 autouml.mapping.ScopeType.FILE
             );
             mapNode(sourceFile);
+            mapper.endScope();
         }
     });
     function mapNode(node: ts.Node) {
+        let identifierNode: ts.Identifier | undefined =
+            undefined;
         switch (node.kind) {
             case ts.SyntaxKind.ModuleDeclaration:
             case ts.SyntaxKind.EnumDeclaration:
@@ -148,11 +182,18 @@ function mapFiles(
 
             case ts.SyntaxKind.PropertySignature: {
                 // for interfaces at least
+                for (let c of node.getChildren()) {
+                    if (
+                        c.kind === ts.SyntaxKind.Identifier
+                    ) {
+                        identifierNode = c as ts.Identifier;
+                    }
+                }
                 // 0th child is id
                 // 2th child is the type, which can be a lot of things
                 // TODO: see if theres a way to do this more safely
                 mapper.addPropertySignature(
-                    node.getChildAt(0).getText(),
+                    identifierNode!.text,
                     checker.typeToString(
                         checker.getTypeAtLocation(node)
                     )
@@ -184,14 +225,83 @@ function mapFiles(
 
             case ts.SyntaxKind.PropertyDeclaration: {
                 if (ts.isPropertyDeclaration(node)) {
+                    for (let c of node.getChildren()) {
+                        if (
+                            c.kind ===
+                            ts.SyntaxKind.Identifier
+                        ) {
+                            identifierNode =
+                                c as ts.Identifier;
+                        }
+                    }
                     mapper.addPropertyDeclaration(
-                        node.getChildAt(0).getText(),
+                        identifierNode!.text,
                         modifierlistToModifierSet(
                             node.modifiers
                         ),
                         checker.typeToString(
                             checker.getTypeAtLocation(node)
                         )
+                    );
+                }
+            }
+
+            case ts.SyntaxKind.Constructor: {
+                if (ts.isConstructorDeclaration(node)) {
+                    let signature =
+                        checker.getSignatureFromDeclaration(
+                            node
+                        )!;
+                    mapper.addMethod(
+                        "constructor",
+                        modifierlistToModifierSet(
+                            node.modifiers
+                        ),
+                        checker.typeToString(
+                            checker.getReturnTypeOfSignature(
+                                signature
+                            )
+                        ),
+                        paramDeclListToIParams(
+                            node.parameters,
+                            checker
+                        ),
+                        true
+                    );
+                    return;
+                }
+                break;
+            }
+            case ts.SyntaxKind.MethodDeclaration: {
+                if (ts.isMethodDeclaration(node)) {
+                    for (let c of node.getChildren()) {
+                        if (
+                            c.kind ===
+                            ts.SyntaxKind.Identifier
+                        ) {
+                            identifierNode =
+                                c as ts.Identifier;
+                        }
+                    }
+                    let signature =
+                        checker.getSignatureFromDeclaration(
+                            node
+                        )!;
+                    mapper.addMethod(
+                        identifierNode!.text,
+                        modifierlistToModifierSet(
+                            node.modifiers
+                        ),
+                        checker.typeToString(
+                            checker.getReturnTypeOfSignature(
+                                signature
+                            )
+                        ),
+                        paramDeclListToIParams(
+                            node.parameters,
+                            checker
+                        ),
+                        false
                     );
                 }
             }

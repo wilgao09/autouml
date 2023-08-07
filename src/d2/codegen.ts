@@ -52,7 +52,8 @@ export default class d2Codegen
         for (let i = 0; i < lines.length; i++) {
             lines[i] = lines[i].replace(/[\[\]]/g, "\\$&");
         }
-        return [`Program: {`, ...indentLines(lines), `}`];
+        return lines;
+        // return [`Program: {`, ...indentLines(lines), `}`];
     }
     protected visitFile(
         scope: autouml.mapping.IScope,
@@ -60,7 +61,10 @@ export default class d2Codegen
     ): string[] {
         let lines = childData.flat();
         return [
-            `${scope.name} {`,
+            `${scope.name
+                .replace(/\\/g, "\\\\")
+                .replace(/:/g, "\\:")
+                .replace(/\./g, "\\.")} {`,
             ...indentLines(lines),
             `}`,
         ];
@@ -89,11 +93,9 @@ export default class d2Codegen
             `${scope.name} {`,
             ...indentLines([
                 `shape: class`,
-
-                `# Field Data`,
+                "# Field Data",
                 ...fLines,
-
-                `#Method Data`,
+                "# Method Data",
                 ...mLines,
             ]),
             `}`,
@@ -156,6 +158,13 @@ export default class d2Codegen
     protected visitClassMethod(
         m: autouml.mapping.IClassMethods
     ): string[] {
-        return ["METHOD HERE"];
+        let params = m.parameters.map(
+            (x) => `${x.name}\\: ${x.type}`
+        );
+        return [
+            `${accessToPrefix(m.access)}${
+                m.name
+            }(${params}) : ${m.type}`,
+        ];
     }
 }

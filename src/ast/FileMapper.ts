@@ -5,6 +5,7 @@ import { autouml } from "../../typings";
 class FileMapper {
     private map: autouml.mapping.IScope;
     private currentScope: autouml.mapping.IScope;
+    private numconstructors: number;
     constructor() {
         this.map = {
             scopeType: autouml.mapping.ScopeType.PROGRAM,
@@ -13,6 +14,7 @@ class FileMapper {
             parent: null,
         };
         this.currentScope = this.map;
+        this.numconstructors = 0;
     }
 
     public startScope(
@@ -66,7 +68,10 @@ class FileMapper {
         }
     }
 
-    public addPropertySignature(name: string, type: any) {
+    public addPropertySignature(
+        name: string,
+        type: autouml.mapping.ITSType
+    ) {
         if (
             this.currentScope.scopeType ===
             autouml.mapping.ScopeType.INTERFACE
@@ -83,7 +88,7 @@ class FileMapper {
     public addPropertyDeclaration(
         name: string,
         access: Set<autouml.mapping.AccessModifier>,
-        type: any
+        type: autouml.mapping.ITSType
     ) {
         if (
             this.currentScope.scopeType ===
@@ -96,6 +101,39 @@ class FileMapper {
                 type,
                 access,
             });
+        }
+    }
+
+    public addMethod(
+        name: string,
+        access: Set<autouml.mapping.AccessModifier>,
+        type: autouml.mapping.ITSType,
+        parameters: autouml.mapping.IParam[],
+        isConstructor: boolean = false
+    ) {
+        if (
+            this.currentScope.scopeType ===
+            autouml.mapping.ScopeType.CLASS
+        ) {
+            let escope = this
+                .currentScope as autouml.mapping.IClassScope;
+            let obj = {
+                name,
+                type,
+                access,
+                parameters,
+                isConstructor: isConstructor,
+            };
+            if (isConstructor) {
+                escope.methods.splice(
+                    this.numconstructors,
+                    0,
+                    obj
+                );
+                this.numconstructors++;
+            } else {
+                escope.methods.push(obj);
+            }
         }
     }
 }

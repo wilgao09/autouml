@@ -21,4 +21,12 @@ describe("codegen tests", () => {
 
         console.log(d2gen.visit(map));
     });
+
+    test("it can handle many files", () => {
+        let d2gen = new d2Codegen();
+        let map = mapFiles(["./test/files/*.ts"], {});
+        console.log("==========");
+        console.log(d2gen.visit(map));
+        console.log("==========");
+    });
 });

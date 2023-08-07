@@ -62,15 +62,22 @@ export namespace autouml {
             methods: Array<IClassMethods>;
         }
         interface IParam {
-            type: any; //TODO: wtf is this
+            type: ITSType; //TODO: wtf is this
             name: string;
         }
         interface IClassField {
             access: Set<AccessModifier>;
             name: string;
-            type: any;
+            type: ITSType;
         }
-        interface IClassMethods {}
+        interface IClassMethods {
+            isConstructor: boolean;
+            access: Set<AccessModifier>;
+            name: string;
+            type: ITSType;
+            parameters: IParam[];
+        }
+        type ITSType = any;
     }
 }
 // }
