@@ -1,59 +1,59 @@
-import { autouml } from "../typings";
-import { d2StringOfObject } from "./convertTod2";
-import { isWatchTarget } from "./typecheck";
+import { readFileSync } from "fs";
+import * as ts from "typescript";
 
-class AutoUML {
-    watchObjects: Array<object>;
-    watchConstructors: Array<Function>;
-    constructor() { // ...objsAndClasses: Array<autouml.lib.WatchTarget>
-        this.watchObjects = [];
-        this.watchConstructors = [];
-        // for (let arg of objsAndClasses) {
-        //     this.add(arg);
-        // }
-    }
-
-    toString(): string {
-        let output = "";
-        let i = 0;
-        for (let o of this.watchObjects) {
-            output += d2StringOfObject(o, i.toString());
-            i++;
-        }
-
-        return output;
-    }
-
-    output() {}
-
-    add(
-        arg: autouml.lib.WatchTarget | object | Function
-    ): boolean {
-        let targ: object | Function;
-        let name: string = "";
-        if (isWatchTarget(arg)) {
-            targ = arg.target;
-            name = arg.name;
-        } else {
-            targ = arg;
-            if ((targ as any)["name"] !== undefined) {
-                name = (targ as any)["name"];
-            } else {
-                name = `object-${this.watchObjects.length}`;
+function delint(sourceFile: ts.SourceFile) {
+    function delintNode(node: ts.Node) {
+        switch (node.kind) {
+            case ts.SyntaxKind.ModuleDeclaration: {
+                // search for an identifier object in the children
+                // console.log(node.getChildren()[2]);
             }
         }
-        if (typeof targ === "function") {
-            this.watchConstructors.push(targ);
-        } else if (typeof arg === "object") {
-            this.watchObjects.push(targ);
-        } else {
-            return false;
-        }
-        return true;
-    }
 
-    remove(a: object | Function) {}
+        ts.forEachChild(node, delintNode);
+    }
+    delintNode(sourceFile);
+    // function report(node: ts.Node, message: string) {
+    //     const { line, character } =
+    //         sourceFile.getLineAndCharacterOfPosition(
+    //             node.getStart()
+    //         );
+    //     console.log(
+    //         `${sourceFile.fileName} (${line + 1},${
+    //             character + 1
+    //         }): ${message}`
+    //     );
+    // }
 }
 
-export default AutoUML;
-export { AutoUML };
+let indent = 0;
+function print(node: ts.Node) {
+    console.log(
+        new Array(indent + 1).join(" ") +
+            ts.SyntaxKind[node.kind]
+    );
+    indent++;
+    ts.forEachChild(node, print);
+    indent--;
+}
+
+// const fileNames = process.argv.slice(2);
+// fileNames.forEach((fileName) => {
+//     // Parse a file
+
+// });
+
+function readFile(fileName: string) {
+    const sourceFile = ts.createSourceFile(
+        fileName,
+        readFileSync(fileName).toString(),
+        ts.ScriptTarget.ES2015,
+        /*setParentNodes */ true
+    );
+
+    // delint it
+    // delint(sourceFile);
+    print(sourceFile);
+}
+
+export { readFile };
