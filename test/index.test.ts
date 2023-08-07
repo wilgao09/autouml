@@ -1,4 +1,4 @@
-import * as trav from "../src/index";
+import * as trav from "../src/debugging/ast";
 import { mapFiles } from "../src/ast/helpers";
 import * as util from "util";
 import * as ts from "typescript";

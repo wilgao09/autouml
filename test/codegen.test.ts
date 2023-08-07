@@ -1,4 +1,3 @@
-import * as trav from "../src/index";
 import { mapFiles } from "../src/ast/helpers";
 import d2Codegen from "../src/d2/codegen";
 import * as util from "util";

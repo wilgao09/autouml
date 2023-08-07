@@ -1,40 +1,45 @@
 {
-  "name": "autouml",
-  "version": "1.0.0",
-  "description": "Autogenerate UML diagrams using d2",
-  "main": "./dist/index.js",
-  "typings": "./typings.d.ts",
-  "scripts": {
-    "test": "jest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/wilgao09/autouml.git"
-  },
-  "keywords": [
-    "d2",
-    "UML"
-  ],
-  "author": "William Gao",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/wilgao09/autouml/issues"
-  },
-  "homepage": "https://github.com/wilgao09/autouml#readme",
-  "devDependencies": {
-    "@types/jest": "^29.5.3",
-    "jest": "^29.6.2",
-    "ts-jest": "^29.1.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.1.6"
-  },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "package.json"
-  ],
-  "dependencies": {
-    "glob": "^10.3.3"
-  }
+    "name": "autouml",
+    "version": "1.0.0",
+    "description": "Autogenerate UML diagrams using d2",
+    "main": "./dist/index.js",
+    "typings": "./typings.d.ts",
+    "scripts": {
+        "test": "jest",
+        "build": "tsc",
+        "dogfood": "node dist/index.js"
+    },
+    "bin": {
+        "autouml": "./dist/index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/wilgao09/autouml.git"
+    },
+    "keywords": [
+        "d2",
+        "UML"
+    ],
+    "author": "William Gao",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/wilgao09/autouml/issues"
+    },
+    "homepage": "https://github.com/wilgao09/autouml#readme",
+    "devDependencies": {
+        "@types/jest": "^29.5.3",
+        "jest": "^29.6.2",
+        "ts-jest": "^29.1.1",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.1.6"
+    },
+    "files": [
+        "dist",
+        "LICENSE",
+        "README.md",
+        "package.json"
+    ],
+    "dependencies": {
+        "glob": "^10.3.3"
+    }
 }

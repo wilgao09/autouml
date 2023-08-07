@@ -1,4 +1,4 @@
-import { autouml } from "../../typings";
+import { autouml } from "../../typings/typings";
 import Visitor from "../visitor";
 
 function accessToPrefix(
@@ -12,7 +12,7 @@ function accessToPrefix(
     } else if (
         access.has(autouml.mapping.AccessModifier.PROTECTED)
     ) {
-        tor = "#";
+        tor = "\\#";
     } else {
         tor = "+";
     }
@@ -50,7 +50,10 @@ export default class d2Codegen
         let lines = childData.flat();
         // note that we need to escape all square brackets
         for (let i = 0; i < lines.length; i++) {
-            lines[i] = lines[i].replace(/[\[\]]/g, "\\$&");
+            lines[i] = lines[i].replace(
+                /[\[\]\.><]/g,
+                "\\$&"
+            );
         }
         return lines;
         // return [`Program: {`, ...indentLines(lines), `}`];
@@ -63,8 +66,7 @@ export default class d2Codegen
         return [
             `${scope.name
                 .replace(/\\/g, "\\\\")
-                .replace(/:/g, "\\:")
-                .replace(/\./g, "\\.")} {`,
+                .replace(/:/g, "\\:")} {`,
             ...indentLines(lines),
             `}`,
         ];
@@ -76,7 +78,8 @@ export default class d2Codegen
         let lines = childData.flat();
         return [
             `${scope.name} {`,
-            ...indentLines(lines),
+
+            ...indentLines([`shape: package`, ...lines]),
             `}`,
         ];
     }

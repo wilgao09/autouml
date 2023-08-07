@@ -1,12 +1,21 @@
 import ts from "typescript";
 import { readFileSync } from "fs";
-import { autouml } from "../../typings";
+import { autouml } from "../../typings/typings";
+import { mapFiles } from "./helpers";
 
 class FileMapper {
     private map: autouml.mapping.IScope;
     private currentScope: autouml.mapping.IScope;
     private numconstructors: number;
-    constructor() {
+
+    // NOTE: these two are not used by this class itself; they are passed
+    // to helper functions. These are here for bookkeeping reasons
+    private files: string[];
+    private tsoptions: ts.CompilerOptions | {};
+    constructor(
+        files: string[],
+        tsoptions?: ts.CompilerOptions
+    ) {
         this.map = {
             scopeType: autouml.mapping.ScopeType.PROGRAM,
             name: "program",
@@ -15,6 +24,16 @@ class FileMapper {
         };
         this.currentScope = this.map;
         this.numconstructors = 0;
+        this.tsoptions = tsoptions ?? {};
+        this.files = files;
+    }
+
+    public mapFiles(): autouml.mapping.IScope {
+        return mapFiles(this.files, this.tsoptions);
+    }
+
+    private getFiles(): Readonly<string[]> {
+        return this.files;
     }
 
     public startScope(

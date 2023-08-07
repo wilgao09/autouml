@@ -1,59 +1,48 @@
-import { readFileSync } from "fs";
-import * as ts from "typescript";
+/**
+ * Main entry into the program
+ */
 
-function delint(sourceFile: ts.SourceFile) {
-    function delintNode(node: ts.Node) {
-        switch (node.kind) {
-            case ts.SyntaxKind.ModuleDeclaration: {
-                // search for an identifier object in the children
-                // console.log(node.getChildren()[2]);
-            }
-        }
+import { parseArgs } from "node:util";
+import { autouml } from "../typings/typings";
+import { buildUML } from "./cli/buildUML";
 
-        ts.forEachChild(node, delintNode);
-    }
-    delintNode(sourceFile);
-    // function report(node: ts.Node, message: string) {
-    //     const { line, character } =
-    //         sourceFile.getLineAndCharacterOfPosition(
-    //             node.getStart()
-    //         );
-    //     console.log(
-    //         `${sourceFile.fileName} (${line + 1},${
-    //             character + 1
-    //         }): ${message}`
-    //     );
-    // }
+const commandLineArgs = parseArgs({
+    options: {
+        help: {
+            type: "boolean",
+            short: "h",
+        },
+        verbose: {
+            type: "boolean",
+            short: "v",
+        },
+    },
+});
+
+const USAGE = `
+Usage: autouml [OPTION]...
+    Automatically generates UML diagrams for typescript projects. This makes use of the local tsconfig.json.
+`;
+
+let flags = commandLineArgs.values;
+
+if (flags.help) {
+    console.log(USAGE);
+    process.exit(0);
 }
 
-let indent = 0;
-function print(node: ts.Node) {
-    console.log(
-        new Array(indent + 1).join(" ") +
-            ts.SyntaxKind[node.kind]
-    );
-    indent++;
-    ts.forEachChild(node, print);
-    indent--;
+const options: autouml.cli.IOptions = {
+    baseDir: "./",
+    tsconfigFileName: "tsconfig.json",
+    outputPath: "./uml.d2",
+    target: autouml.codegen.Target.d2,
+    verbose: false,
+};
+
+// TODO: change options object based on command line inputs
+
+if (flags.verbose) {
+    options.verbose = true;
 }
 
-// const fileNames = process.argv.slice(2);
-// fileNames.forEach((fileName) => {
-//     // Parse a file
-
-// });
-
-function readFile(fileName: string) {
-    const sourceFile = ts.createSourceFile(
-        fileName,
-        readFileSync(fileName).toString(),
-        ts.ScriptTarget.ES2015,
-        /*setParentNodes */ true
-    );
-
-    // delint it
-    // delint(sourceFile);
-    print(sourceFile);
-}
-
-export { readFile };
+buildUML(options);

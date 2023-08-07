@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { autouml } from "../../typings";
+import { autouml } from "../../typings/typings";
 import { FileMapper } from "./FileMapper";
 import { readFileSync } from "fs";
 import * as util from "util";
@@ -136,7 +136,7 @@ function mapFiles(
             fileMap.set(path.resolve(f), true);
         }
     }
-    let mapper = new FileMapper();
+    let mapper = new FileMapper(files);
     let program = ts.createProgram(files, options);
     let checker = program.getTypeChecker();
 

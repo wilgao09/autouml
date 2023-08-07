@@ -2,25 +2,15 @@ import ts from "typescript";
 
 // declare global {
 export namespace autouml {
-    // namespace d2 {
-    //     // interface n {
-    //     //     k: import("./src/structs/ClassStruct").ClassStruct;
-    //     // }
-    //     enum AccessModifier {
-    //         PUBLIC,
-    //         PRIVATE,
-    //         PROTECTED,
-    //     }
-    //     interface ClassEntry {
-    //         access: AccessModifier;
-    //         name: string;
-    //         arguments?: {
-    //             name: string;
-    //             type: string;
-    //         }[];
-    //         type?: string;
-    //     }
-    // }
+    namespace cli {
+        interface IOptions {
+            baseDir: string;
+            tsconfigFileName: string;
+            outputPath: string;
+            target: codegen.Target;
+            verbose: boolean;
+        }
+    }
 
     namespace codegen {
         const enum Target {

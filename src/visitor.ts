@@ -1,4 +1,4 @@
-import { autouml } from "../typings";
+import { autouml } from "../typings/typings";
 
 export class VisitingMapNotDefinedError extends Error {
     constructor() {
