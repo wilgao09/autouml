@@ -1,14 +1,35 @@
 import ts from "typescript";
-
+import * as util from "node:util";
 // declare global {
 export namespace autouml {
     namespace cli {
         interface IOptions {
             baseDir: string;
             tsconfigFileName: string;
-            outputPath: string;
+            outPath: string;
             target: codegen.Target;
             verbose: boolean;
+        }
+        interface IParseArgsConfig
+            extends util.ParseArgsConfig {
+            usage: string;
+            description: string;
+            options: IParseArgsOptionsConfig;
+        }
+        interface IParseArgsOptionsConfig {
+            [longOption: string]: IParseArgsOptionConfig;
+        }
+        interface IParseArgsOptionConfig {
+            description: string;
+            type: "string" | "boolean";
+            multiple?: boolean | undefined;
+            short: string | undefined;
+            default?:
+                | string
+                | boolean
+                | string[]
+                | boolean[]
+                | undefined;
         }
     }
 

@@ -70,11 +70,9 @@ function buildUML(options: autouml.cli.IOptions) {
     verbose("Generating code");
     let code = visitor.visit(programMap, programConnectors);
     verbose(
-        `Writing code to ${path.resolve(
-            options.outputPath
-        )}`
+        `Writing code to ${path.resolve(options.outPath)}`
     );
-    fs.writeFileSync(options.outputPath, code);
+    fs.writeFileSync(options.outPath, code);
 }
 
 export { buildUML };

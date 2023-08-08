@@ -2,39 +2,90 @@
  * Main entry into the program
  */
 
-import { parseArgs } from "node:util";
+import * as util from "node:util";
 import { autouml } from "../typings/typings";
 import { buildUML } from "./cli/buildUML";
 
-const commandLineArgs = parseArgs({
+const PARSE_ARGS_CONFIG: autouml.cli.IParseArgsConfig = {
+    usage: "usage: autouml [OPTION]...",
+    description:
+        "Generate a UML diagram for a Typescript project.",
     options: {
         help: {
             type: "boolean",
             short: "h",
+            description: "display this help and exit",
         },
         verbose: {
             type: "boolean",
             short: "v",
+            description:
+                "print a message for each major step",
+        },
+        baseDir: {
+            type: "string",
+            short: "d",
+            description:
+                "set the base directory for all operations",
+        },
+        tsconfigFileName: {
+            type: "string",
+            short: "c",
+            description:
+                "set the name of the tsconfig file to search for",
+        },
+        outPath: {
+            type: "string",
+            short: "o",
+            description: "set the output file",
         },
     },
-});
+} as const;
 
-const USAGE = `
-Usage: autouml [OPTION]...
-    Automatically generates UML diagrams for typescript projects. This makes use of the local tsconfig.json.
-`;
+function generateUsageMessage(
+    config: autouml.cli.IParseArgsConfig
+) {
+    const usage = [config.usage, config.description];
+    let maxLength = 0;
+    let descs = [];
+    if (config.options) {
+        for (const [long, op] of Object.entries(
+            config.options
+        )) {
+            const optionText = `  --${long}, -${op.short}`;
+            const typeText =
+                op.type === "boolean" ? "" : `<${op.type}>`;
+            let t = `${optionText} ${typeText}`;
+            maxLength = Math.max(maxLength, t.length);
+            usage.push(t);
+            descs.push(op.description);
+        }
+        for (let i = 2; i < usage.length; i++) {
+            usage[i] += new Array(
+                maxLength - usage[i].length
+            )
+                .fill(" ")
+                .join("");
+            usage[i] += `    ${descs[i - 2]}`;
+        }
+    }
+
+    return usage.join("\n");
+}
+
+const commandLineArgs = util.parseArgs(PARSE_ARGS_CONFIG);
 
 let flags = commandLineArgs.values;
 
 if (flags.help) {
-    console.log(USAGE);
+    console.log(generateUsageMessage(PARSE_ARGS_CONFIG));
     process.exit(0);
 }
 
 const options: autouml.cli.IOptions = {
     baseDir: "./",
     tsconfigFileName: "tsconfig.json",
-    outputPath: "./uml.d2",
+    outPath: "./uml.d2",
     target: autouml.codegen.Target.d2,
     verbose: false,
 };
@@ -43,6 +94,19 @@ const options: autouml.cli.IOptions = {
 
 if (flags.verbose) {
     options.verbose = true;
+}
+
+if (flags.baseDir) {
+    options.baseDir = flags.baseDir as string;
+}
+
+if (flags.tsconfigFileName) {
+    options.tsconfigFileName =
+        flags.tsconfigFileName as string;
+}
+
+if (flags.outDir) {
+    options.outPath = flags.outPath as string;
 }
 
 buildUML(options);

@@ -321,8 +321,6 @@ function mapFiles(
         }
     });
     function mapNode(node: ts.Node) {
-        let identifierNode: ts.Identifier | undefined =
-            undefined;
         switch (node.kind) {
             case ts.SyntaxKind.ModuleDeclaration:
             case ts.SyntaxKind.EnumDeclaration:
@@ -395,38 +393,24 @@ function mapFiles(
 
             case ts.SyntaxKind.PropertySignature: {
                 // for interfaces at least
-                for (let c of node.getChildren()) {
-                    if (
-                        c.kind === ts.SyntaxKind.Identifier
-                    ) {
-                        identifierNode = c as ts.Identifier;
-                    }
+                if (ts.isPropertySignature(node)) {
+                    mapper.addPropertySignature(
+                        node.name.getText(),
+                        tsTypeToAutoUMLType(
+                            mapper.getCurrentFileName(),
+                            checker,
+                            checker.getTypeAtLocation(node)
+                        )
+                    );
                 }
-                mapper.addPropertySignature(
-                    identifierNode!.text,
-                    tsTypeToAutoUMLType(
-                        mapper.getCurrentFileName(),
-                        checker,
-                        checker.getTypeAtLocation(node)
-                    )
-                );
 
                 break;
             }
 
             case ts.SyntaxKind.PropertyDeclaration: {
                 if (ts.isPropertyDeclaration(node)) {
-                    for (let c of node.getChildren()) {
-                        if (
-                            c.kind ===
-                            ts.SyntaxKind.Identifier
-                        ) {
-                            identifierNode =
-                                c as ts.Identifier;
-                        }
-                    }
                     mapper.addPropertyDeclaration(
-                        identifierNode!.text,
+                        node.name?.getText(),
                         modifierlistToModifierSet(
                             node.modifiers
                         ),
@@ -471,21 +455,12 @@ function mapFiles(
             }
             case ts.SyntaxKind.MethodDeclaration: {
                 if (ts.isMethodDeclaration(node)) {
-                    for (let c of node.getChildren()) {
-                        if (
-                            c.kind ===
-                            ts.SyntaxKind.Identifier
-                        ) {
-                            identifierNode =
-                                c as ts.Identifier;
-                        }
-                    }
                     let signature =
                         checker.getSignatureFromDeclaration(
                             node
                         )!;
                     mapper.addMethod(
-                        identifierNode!.text,
+                        node.name?.getText(),
                         modifierlistToModifierSet(
                             node.modifiers
                         ),
