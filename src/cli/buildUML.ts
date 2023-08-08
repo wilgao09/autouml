@@ -58,17 +58,17 @@ function buildUML(options: autouml.cli.IOptions) {
         `${options.baseDir}/typings/**.ts`,
     ]);
     verbose("Mapping files");
-    let programMap = mapper.mapFiles();
+    let [programMap, programConnectors] = mapper.mapFiles();
     // compile to target
     verbose("Selecting code generator");
     let visitor: Visitor;
     switch (options.target) {
         default:
-            visitor = new d2Codegen(programMap);
+            visitor = new d2Codegen();
     }
     // write to file
     verbose("Generating code");
-    let code = visitor.visit();
+    let code = visitor.visit(programMap, programConnectors);
     verbose(
         `Writing code to ${path.resolve(
             options.outputPath

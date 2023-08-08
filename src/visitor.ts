@@ -1,4 +1,5 @@
 import { autouml } from "../typings/typings";
+import { compileRelations } from "./d2/arrows";
 
 export class VisitingMapNotDefinedError extends Error {
     constructor() {
@@ -8,16 +9,26 @@ export class VisitingMapNotDefinedError extends Error {
 
 export default abstract class Visitor {
     map: autouml.mapping.IScope | null;
-    constructor(map?: autouml.mapping.IScope | null) {
+    relations: autouml.mapping.IConnector[];
+    constructor(
+        map?: autouml.mapping.IScope | null,
+        relations?: autouml.mapping.IConnector[]
+    ) {
         if (map) {
             this.map = map;
         } else {
             this.map = null;
         }
+        if (relations) {
+            this.relations = relations;
+        } else {
+            this.relations = [];
+        }
     }
 
     public visit(
-        map?: autouml.mapping.IScope | null
+        map?: autouml.mapping.IScope | null,
+        relations?: autouml.mapping.IConnector[]
     ): string {
         if (map !== undefined) {
             this.map = map;
@@ -25,7 +36,13 @@ export default abstract class Visitor {
         if (!this.map) {
             throw new VisitingMapNotDefinedError();
         }
-        return this._visit(this.map).join("\n");
+        if (relations) {
+            this.relations = relations;
+        }
+        return (
+            this._visit(this.map).join("\n") +
+            `\n${compileRelations(this.relations)}`
+        );
     }
 
     private _visit(

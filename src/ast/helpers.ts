@@ -40,20 +40,55 @@ function kindToScope(
     );
 }
 
+function getNameOfScopeable(n: ts.Node): string {
+    let name = "UNKNOWN NAME";
+    if (ts.isClassDeclaration(n)) {
+        const className = n.name?.text;
+        // Extract type parameters if the class has them
+        let typeParameters =
+            n.typeParameters
+                ?.map((tp) => tp.getText())
+                .join(", ") || "";
+        if (typeParameters !== "") {
+            typeParameters = `<${typeParameters}>`;
+        }
+
+        return `${className}${typeParameters}`;
+    } else {
+        n.forEachChild((cn) => {
+            if (ts.isIdentifier(cn)) {
+                name = cn.getText();
+            }
+        });
+    }
+    return name;
+    // } else if (ts.isInterfaceDeclaration(n)) {
+    //     return n.name?.text;
+    // } else if (ts.isEnumDeclaration(n)) {
+    //     return n.name?.text;
+    // }
+}
+
 function makeScope(
     mapper: FileMapper,
+    checker: ts.TypeChecker,
     node: ts.Node,
     mapNode: (_: ts.Node) => unknown
 ) {
-    node.forEachChild((cn) => {
-        if (cn.kind === ts.SyntaxKind.Identifier) {
-            // add to mapper
-            mapper.startScope(
-                cn.getText(),
-                kindToScope(node.kind)
-            );
-        }
-    });
+    // node.forEachChild((cn) => {
+    //     if (cn.kind === ts.SyntaxKind.Identifier) {
+    // add to mapper
+    mapper.startScope(
+        getNameOfScopeable(node),
+        kindToScope(node.kind),
+        tsTypeToAutoUMLType(
+            mapper.getCurrentFileName(),
+            checker,
+            checker.getTypeAtLocation(node)
+        )
+    );
+    //     }
+    // });
     ts.forEachChild(node, mapNode);
     mapper.endScope();
 }
@@ -79,23 +114,110 @@ function modifierlistToModifierSet(
                     autouml.mapping.AccessModifier.PROTECTED
                 );
                 break;
-            // default:
-            //     if (
-            //         !tor.has(
-            //             autouml.mapping.AccessModifier
-            //                 .PRIVATE
-            //         )
-            //     ) {
-            //         tor.add(
-            //             autouml.mapping.AccessModifier
-            //                 .PUBLIC
-            //         );
-            //     }
-
-            //     break;
         }
     });
 
+    return tor;
+}
+
+const DEFAULT_TYPE: autouml.mapping.ITSType = {
+    name: "any",
+    isPrimitive: true,
+    typeLocation: {
+        fileName: "",
+        duplicatedIn: [],
+        namespaceNest: [],
+    },
+    typeParameters: [],
+};
+
+function locateInterfaceType(
+    currentFileName: string,
+    checker: ts.TypeChecker,
+    i: ts.InterfaceType
+): autouml.mapping.ITSTypeLocation {
+    let tor: autouml.mapping.ITSTypeLocation = {
+        fileName: currentFileName,
+        namespaceNest: [],
+        duplicatedIn: [],
+    };
+    let isym = i.getSymbol();
+
+    if (isym) {
+        // fullname is '"path".A.B.C'
+        // but if the name is local, there is no path
+        let fullName = checker.getFullyQualifiedName(isym);
+
+        // check if the definition is out of this file
+        let fragments = fullName.split('"');
+        //the declaration is out of this file
+        if (fragments[0] === "") {
+            tor.fileName = fragments[1];
+            // note that fragments[1] is missing the file extnesion!!!
+
+            // isolate the namespace nesting
+            fragments[2] = fragments[2].slice(1);
+            tor.namespaceNest = fragments[2].split(".");
+        } else {
+            // fragments[0] is the entire string unchanged
+            tor.namespaceNest = fragments[0].split(".");
+        }
+
+        let currentFileName = path.parse(tor.fileName);
+        // find where this interface is also declared
+        let decls = isym.getDeclarations();
+        if (decls) {
+            decls.forEach((x) => {
+                let p = path.resolve(
+                    x.getSourceFile().fileName
+                );
+                tor.duplicatedIn.push(p);
+                // recall that the current filename might not have the file extension
+                // if the current file has no extension, and p contains the file, we will assume it originated from there
+                if (currentFileName.ext === "") {
+                    tor.fileName = p;
+                    currentFileName = path.parse(
+                        tor.fileName
+                    );
+                }
+            });
+        }
+    }
+
+    return tor;
+}
+
+function tsTypeToAutoUMLType(
+    currentFileName: string,
+    checker: ts.TypeChecker,
+    t: ts.Type
+): autouml.mapping.ITSType {
+    // clone the default type
+    let tor: autouml.mapping.ITSType = JSON.parse(
+        JSON.stringify(DEFAULT_TYPE)
+    );
+    //get the name
+    tor.name = checker.typeToString(t);
+    if (t.isClassOrInterface()) {
+        tor.isPrimitive = false;
+        tor.typeLocation = locateInterfaceType(
+            currentFileName,
+            checker,
+            t
+        );
+    }
+    let targs = (t as ts.TypeReference).typeArguments;
+    if (targs) {
+        for (let arg of targs) {
+            tor.typeParameters.push(
+                tsTypeToAutoUMLType(
+                    currentFileName,
+                    checker,
+                    arg
+                )
+            );
+        }
+    }
     return tor;
 }
 
@@ -105,10 +227,12 @@ function paramDeclListToIParams(
 ): autouml.mapping.IParam[] {
     let tor: autouml.mapping.IParam[] = [];
     tor = p.map((x): autouml.mapping.IParam => {
-        let t: string = "any";
+        let t = DEFAULT_TYPE;
         let tt = x.type;
         if (tt) {
-            t = checker.typeToString(
+            t = tsTypeToAutoUMLType(
+                x.getSourceFile().fileName,
+                checker,
                 checker.getTypeAtLocation(tt)
             );
         }
@@ -121,13 +245,52 @@ function paramDeclListToIParams(
     return tor;
 }
 
+function getAllTypesFromCallExpresion(
+    currentFileName: string,
+    callExpr: ts.CallExpression,
+    checker: ts.TypeChecker
+): autouml.mapping.ITSType[] {
+    let tor: autouml.mapping.ITSType[] = [];
+    tor = callExpr.arguments.map((arg) =>
+        tsTypeToAutoUMLType(
+            currentFileName,
+            checker,
+            checker.getTypeAtLocation(arg)
+        )
+    );
+    const expression = callExpr.expression;
+    if (
+        ts.isPropertyAccessExpression(expression) ||
+        ts.isElementAccessExpression(expression)
+    ) {
+        const objectExpression = expression.expression;
+        const objectType = checker.getTypeAtLocation(
+            objectExpression
+        );
+        tor.push(
+            tsTypeToAutoUMLType(
+                currentFileName,
+                checker,
+                objectType
+            )
+        );
+    }
+    return tor;
+}
+
+/**
+ * Maps a set of input files and stores all data in the mapper
+ * @param mapper
+ * @param inputPaths
+ * @param options
+ */
 function mapFiles(
-    inputPaths: string[],
+    mapper: FileMapper,
     options: ts.CompilerOptions
-): autouml.mapping.IScope {
+) {
     let fileMap = new Map<string, boolean>();
     let files: string[] = [];
-    for (let p of inputPaths) {
+    for (let p of mapper.getFiles()) {
         let fils = globSync(p, {
             ignore: "node_modules/**",
         });
@@ -136,7 +299,7 @@ function mapFiles(
             fileMap.set(path.resolve(f), true);
         }
     }
-    let mapper = new FileMapper(files);
+    // let mapper = new FileMapper(files);
     let program = ts.createProgram(files, options);
     let checker = program.getTypeChecker();
 
@@ -165,7 +328,57 @@ function mapFiles(
             case ts.SyntaxKind.EnumDeclaration:
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.ClassDeclaration:
-                return makeScope(mapper, node, mapNode);
+                if (
+                    ts.isClassDeclaration(node) ||
+                    ts.isInterfaceDeclaration(node)
+                ) {
+                    // get extends and implements data
+                    let hc = node.heritageClauses;
+                    if (hc) {
+                        hc.forEach((c) => {
+                            let relation: autouml.mapping.ConnectorType;
+                            if (
+                                c.token ===
+                                ts.SyntaxKind.ExtendsKeyword
+                            ) {
+                                relation =
+                                    autouml.mapping
+                                        .ConnectorType
+                                        .INHERITS;
+                            } else {
+                                relation =
+                                    autouml.mapping
+                                        .ConnectorType
+                                        .IMPLEMENTS;
+                            }
+                            c.types.forEach((t) => {
+                                mapper.addRelation(
+                                    tsTypeToAutoUMLType(
+                                        mapper.getCurrentFileName(),
+                                        checker,
+                                        checker.getTypeAtLocation(
+                                            c.parent
+                                        )
+                                    ),
+                                    relation,
+                                    tsTypeToAutoUMLType(
+                                        mapper.getCurrentFileName(),
+                                        checker,
+                                        checker.getTypeFromTypeNode(
+                                            t
+                                        )
+                                    )
+                                );
+                            });
+                        });
+                    }
+                }
+                return makeScope(
+                    mapper,
+                    checker,
+                    node,
+                    mapNode
+                );
             /**
              * NON scope starting constructs
              */
@@ -189,36 +402,14 @@ function mapFiles(
                         identifierNode = c as ts.Identifier;
                     }
                 }
-                // 0th child is id
-                // 2th child is the type, which can be a lot of things
-                // TODO: see if theres a way to do this more safely
                 mapper.addPropertySignature(
                     identifierNode!.text,
-                    checker.typeToString(
+                    tsTypeToAutoUMLType(
+                        mapper.getCurrentFileName(),
+                        checker,
                         checker.getTypeAtLocation(node)
                     )
                 );
-                //find symbol
-
-                // let s = checker
-                //     .getTypeAtLocation(node)
-                //     .getSymbol();
-                // if (s) {
-                //     console.log(
-                //         // checker.typeToString(
-                //         checker.getTypeAtLocation(node).
-                //         // )
-                //         // checker.getTypeOfSymbolAtLocation(
-                //         //     s,
-                //         //     node
-                //         // )
-                //         // getTypeName(
-                //         // checker.getFullyQualifiedName(s)
-                //         // )
-
-                //         // checker.getSymbolAtLocation(n)
-                //     );
-                // }
 
                 break;
             }
@@ -239,11 +430,14 @@ function mapFiles(
                         modifierlistToModifierSet(
                             node.modifiers
                         ),
-                        checker.typeToString(
+                        tsTypeToAutoUMLType(
+                            mapper.getCurrentFileName(),
+                            checker,
                             checker.getTypeAtLocation(node)
                         )
                     );
                 }
+                break;
             }
 
             case ts.SyntaxKind.Constructor: {
@@ -257,7 +451,9 @@ function mapFiles(
                         modifierlistToModifierSet(
                             node.modifiers
                         ),
-                        checker.typeToString(
+                        tsTypeToAutoUMLType(
+                            mapper.getCurrentFileName(),
+                            checker,
                             checker.getReturnTypeOfSignature(
                                 signature
                             )
@@ -270,6 +466,7 @@ function mapFiles(
                     );
                     return;
                 }
+                mapper.preventNewFunctions();
                 break;
             }
             case ts.SyntaxKind.MethodDeclaration: {
@@ -292,7 +489,9 @@ function mapFiles(
                         modifierlistToModifierSet(
                             node.modifiers
                         ),
-                        checker.typeToString(
+                        tsTypeToAutoUMLType(
+                            mapper.getCurrentFileName(),
+                            checker,
                             checker.getReturnTypeOfSignature(
                                 signature
                             )
@@ -303,13 +502,40 @@ function mapFiles(
                         ),
                         false
                     );
+                    mapper.preventNewFunctions();
+                    break;
+                }
+            }
+
+            // understand class dependecies
+            case ts.SyntaxKind.CallExpression: {
+                if (ts.isCallExpression(node)) {
+                    let types =
+                        getAllTypesFromCallExpresion(
+                            mapper.getCurrentFileName(),
+                            node,
+                            checker
+                        );
+                    for (let t of types) {
+                        if (!t.isPrimitive) {
+                            mapper.addCurrentScopeRelation(
+                                autouml.mapping
+                                    .ConnectorType.DEPENDS,
+                                t
+                            );
+                        }
+                    }
                 }
             }
         }
         ts.forEachChild(node, mapNode);
+        if (
+            ts.isMethodDeclaration(node) ||
+            ts.isConstructorDeclaration(node)
+        ) {
+            mapper.allowNewFunctions();
+        }
     }
-
-    return mapper.getMapping();
 }
 
 export { mapFiles };

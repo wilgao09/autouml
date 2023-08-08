@@ -40,16 +40,20 @@ export namespace autouml {
             name: string;
             children: Array<IScope>;
             parent: IScope | null;
+            connectors: Array<IConnector>;
         }
         interface IInterfaceScope extends IScope {
             interfaceData: IParam[];
+            selfType: ITSType;
         }
         interface IEnumScope extends IScope {
             enumData: string[];
+            selfType: ITSType;
         }
         interface IClassScope extends IScope {
             fields: Array<IClassField>;
             methods: Array<IClassMethods>;
+            selfType: ITSType;
         }
         interface IParam {
             type: ITSType; //TODO: wtf is this
@@ -67,7 +71,32 @@ export namespace autouml {
             type: ITSType;
             parameters: IParam[];
         }
-        type ITSType = any;
+        interface ITSType {
+            name: string;
+            isPrimitive: boolean;
+            typeLocation: ITSTypeLocation;
+            typeParameters: ITSType[];
+        }
+
+        interface ITSTypeLocation {
+            fileName: string;
+            duplicatedIn: string[];
+            namespaceNest: string[];
+        }
+        const enum ConnectorType {
+            INHERITS,
+            IMPLEMENTS,
+            DEPENDS,
+            AGGREGATES,
+            COMPOSES,
+            ASSOCIATES,
+        }
+
+        interface IConnector {
+            src: ITSType;
+            type: ConnectorType;
+            dst: ITSType;
+        }
     }
 }
 // }

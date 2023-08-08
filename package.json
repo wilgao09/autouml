@@ -1,13 +1,13 @@
 {
     "name": "autouml",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Autogenerate UML diagrams using d2",
     "main": "./dist/index.js",
-    "typings": "./typings.d.ts",
+    "types": "./dist/index.d.ts",
     "scripts": {
         "test": "jest",
         "build": "tsc",
-        "dogfood": "node dist/index.js"
+        "dogfood": "npm run build && node dist/index.js"
     },
     "bin": {
         "autouml": "./dist/index.js"

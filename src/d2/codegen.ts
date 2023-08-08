@@ -48,13 +48,7 @@ export default class d2Codegen
         childData: string[][]
     ): string[] {
         let lines = childData.flat();
-        // note that we need to escape all square brackets
-        for (let i = 0; i < lines.length; i++) {
-            lines[i] = lines[i].replace(
-                /[\[\]\.><]/g,
-                "\\$&"
-            );
-        }
+
         return lines;
         // return [`Program: {`, ...indentLines(lines), `}`];
     }
@@ -64,9 +58,10 @@ export default class d2Codegen
     ): string[] {
         let lines = childData.flat();
         return [
-            `${scope.name
-                .replace(/\\/g, "\\\\")
-                .replace(/:/g, "\\:")} {`,
+            `${scope.name.replace(
+                /[\[\]\.><\\:]/g,
+                "\\$&"
+            )} {`,
             ...indentLines(lines),
             `}`,
         ];
@@ -146,15 +141,15 @@ export default class d2Codegen
     protected visitInterfaceField(
         f: autouml.mapping.IParam
     ): string[] {
-        return [`+${f.name} : ${f.type}`];
+        return [`+${f.name} : ${typeToString(f.type)}`];
     }
     protected visitClassField(
         f: autouml.mapping.IClassField
     ): string[] {
         return [
-            `${accessToPrefix(f.access)}${f.name} : ${
-                f.type
-            }`,
+            `${accessToPrefix(f.access)}${
+                f.name
+            } : ${typeToString(f.type)}`,
         ];
     }
 
@@ -162,12 +157,27 @@ export default class d2Codegen
         m: autouml.mapping.IClassMethods
     ): string[] {
         let params = m.parameters.map(
-            (x) => `${x.name}\\: ${x.type}`
+            (x) =>
+                `${x.name}\\: ${typeToString(
+                    x.type,
+                    false
+                )}`
         );
         return [
             `${accessToPrefix(m.access)}${
                 m.name
-            }(${params}) : ${m.type}`,
+            }(${params}) : ${typeToString(m.type)}`,
         ];
+    }
+}
+
+function typeToString(
+    t: autouml.mapping.ITSType,
+    atEnd: boolean = true
+): string {
+    if (atEnd) {
+        return `|ts ${t.name}|`;
+    } else {
+        return t.name.replace(/[\[\]\.><]/g, "\\$&");
     }
 }

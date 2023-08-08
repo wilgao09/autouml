@@ -29,7 +29,7 @@ describe("output investigation", () => {
         trav.readFile("./test/files/hw.ts");
     });
 
-    test("scope mapping", () => {
-        inspect(mapFiles(["./test/files/hw.ts"], {}));
-    });
+    // test("scope mapping", () => {
+    //     inspect(mapFiles(["./test/files/hw.ts"], {}));
+    // });
 });
