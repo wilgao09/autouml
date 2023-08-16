@@ -113,8 +113,7 @@ export default class d2Codegen
                 `# Field Data`,
                 ...fLines,
             ]),
-
-            " }",
+            "}",
         ];
     }
     protected visitEnum(
