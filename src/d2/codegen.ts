@@ -110,7 +110,6 @@ export default class d2Codegen
             `${scope.name} {`,
             ...indentLines([
                 `shape: class`,
-
                 `# Field Data`,
                 ...fLines,
             ]),
@@ -176,7 +175,7 @@ function typeToString(
     atEnd: boolean = true
 ): string {
     if (atEnd) {
-        return `|ts ${t.name}|`;
+        return `|||ts ${t.name}|||`;
     } else {
         return t.name.replace(/[\[\]\.><]/g, "\\$&");
     }

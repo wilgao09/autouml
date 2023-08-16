@@ -1,4 +1,4 @@
-class MissingArgumentError extends Error {
+export class MissingArgumentError extends Error {
     constructor(fnName: string) {
         super(`Missing argument in [${fnName}]`);
     }

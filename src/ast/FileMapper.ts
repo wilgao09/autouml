@@ -1,5 +1,6 @@
 import ts, { isEnumDeclaration } from "typescript";
 import { readFileSync } from "fs";
+import { MissingArgumentError } from "./MissingArgumentError";
 import { autouml } from "../../typings/typings";
 import { mapFiles } from "./helpers";
 
@@ -22,10 +23,7 @@ class FileMapper {
     // to helper functions. These are here for bookkeeping reasons
     private files: string[];
     private tsoptions: ts.CompilerOptions | {};
-    constructor(
-        files: string[],
-        tsoptions?: ts.CompilerOptions
-    ) {
+    constructor(files: string[], tsoptions?: ts.CompilerOptions) {
         this.map = {
             scopeType: autouml.mapping.ScopeType.PROGRAM,
             name: "program",
@@ -41,10 +39,7 @@ class FileMapper {
         this.relations = [];
     }
 
-    public mapFiles(): [
-        autouml.mapping.IScope,
-        autouml.mapping.IConnector[]
-    ] {
+    public mapFiles(): [autouml.mapping.IScope, autouml.mapping.IConnector[]] {
         mapFiles(this, this.tsoptions);
         return [this.map, this.relations];
     }
@@ -56,10 +51,7 @@ class FileMapper {
     public getCurrentFileName(): string {
         // go up the scope tree until you find one that is a file
         let s = this.currentScope;
-        while (
-            s.scopeType != autouml.mapping.ScopeType.FILE &&
-            s != null
-        ) {
+        while (s.scopeType != autouml.mapping.ScopeType.FILE && s != null) {
             let p = s.parent;
             if (p) {
                 s = p;
@@ -111,14 +103,10 @@ class FileMapper {
             if (scopeITSType) {
                 scope.selfType = scopeITSType;
             } else {
-                throw new MissingArgumentError(
-                    "startScope"
-                );
+                throw new MissingArgumentError("startScope");
             }
         }
-        this.currentScope.children.push(
-            scope as autouml.mapping.IScope
-        );
+        this.currentScope.children.push(scope as autouml.mapping.IScope);
         this.currentScope = scope;
     }
 
@@ -139,10 +127,7 @@ class FileMapper {
         }
     }
 
-    public addPropertySignature(
-        name: string,
-        type: autouml.mapping.ITSType
-    ) {
+    public addPropertySignature(name: string, type: autouml.mapping.ITSType) {
         if (scopeIsInterface(this.currentScope)) {
             this.currentScope.interfaceData.push({
                 name,
@@ -184,11 +169,7 @@ class FileMapper {
                 isConstructor: isConstructor,
             };
             if (isConstructor) {
-                this.currentScope.methods.splice(
-                    this.numconstructors,
-                    0,
-                    obj
-                );
+                this.currentScope.methods.splice(this.numconstructors, 0, obj);
                 this.numconstructors++;
             } else {
                 this.currentScope.methods.push(obj);
@@ -217,9 +198,7 @@ class FileMapper {
         dst: autouml.mapping.ITSType
     ) {
         if (
-            scopeIsEnumInterfaceOrClass(
-                this.currentScope
-            ) &&
+            scopeIsEnumInterfaceOrClass(this.currentScope) &&
             !dst.isPrimitive
         ) {
             this.relations.push({
@@ -234,9 +213,7 @@ class FileMapper {
 function scopeIsInterface(
     s: autouml.mapping.IScope
 ): s is autouml.mapping.IInterfaceScope {
-    return (
-        s.scopeType === autouml.mapping.ScopeType.INTERFACE
-    );
+    return s.scopeType === autouml.mapping.ScopeType.INTERFACE;
 }
 
 function scopeIsClass(
@@ -259,8 +236,7 @@ function scopeIsEnumInterfaceOrClass(
     | autouml.mapping.IEnumScope {
     return (
         s.scopeType === autouml.mapping.ScopeType.CLASS ||
-        s.scopeType ===
-            autouml.mapping.ScopeType.INTERFACE ||
+        s.scopeType === autouml.mapping.ScopeType.INTERFACE ||
         s.scopeType === autouml.mapping.ScopeType.ENUM
     );
 }
