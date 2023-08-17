@@ -1,6 +1,6 @@
 {
     "name": "autouml",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Autogenerate UML diagrams using d2",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
