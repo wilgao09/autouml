@@ -94,7 +94,7 @@ function getArrowStyle(
 
 function arrowStyleToString(s: IArrowStyle): string {
     let lines = `: ${s.text ? `"${s.text}"` : ""}{
-    target-arrowhead: * {
+    target-arrowhead: {
         shape: ${s.targetArrowhead.shape}
         style.filled: ${s.targetArrowhead.style.filled}
     }

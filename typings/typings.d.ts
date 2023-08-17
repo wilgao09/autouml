@@ -9,6 +9,7 @@ export namespace autouml {
             outPath: string;
             target: codegen.Target;
             verbose: boolean;
+            debugASTPath: string;
         }
         interface IParseArgsConfig
             extends util.ParseArgsConfig {
@@ -92,6 +93,12 @@ export namespace autouml {
             type: ITSType;
             parameters: IParam[];
         }
+        interface IConnector {
+            src: ITSType;
+            type: ConnectorType;
+            dst: ITSType;
+        }
+
         interface ITSType {
             name: string;
             isPrimitive: boolean;
@@ -111,12 +118,6 @@ export namespace autouml {
             AGGREGATES,
             COMPOSES,
             ASSOCIATES,
-        }
-
-        interface IConnector {
-            src: ITSType;
-            type: ConnectorType;
-            dst: ITSType;
         }
     }
 }

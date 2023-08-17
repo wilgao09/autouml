@@ -6,6 +6,7 @@ import Visitor from "../visitor";
 import d2Codegen from "../d2/codegen";
 import * as fs from "fs";
 import * as path from "path";
+import * as util from "node:util";
 
 let VERBOSE = false;
 
@@ -13,6 +14,10 @@ function verbose(msg: string) {
     if (VERBOSE) {
         console.log(msg);
     }
+}
+
+function inspect(a: any): string {
+    return util.inspect(a, false, null);
 }
 
 function tsconfigOptions(
@@ -73,6 +78,22 @@ function buildUML(options: autouml.cli.IOptions) {
         `Writing code to ${path.resolve(options.outPath)}`
     );
     fs.writeFileSync(options.outPath, code);
+
+    if (options.debugASTPath !== "") {
+        verbose(
+            `Writing AST to ${path.resolve(
+                options.debugASTPath
+            )}`
+        );
+        fs.writeFileSync(
+            options.debugASTPath,
+            `// SCOPES\n${inspect(
+                programMap
+            )}\n// CONNECTIONS\n${inspect(
+                programConnectors
+            )}`
+        );
+    }
 }
 
 export { buildUML };

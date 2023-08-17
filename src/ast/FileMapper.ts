@@ -4,26 +4,25 @@ import { MissingArgumentError } from "./MissingArgumentError";
 import { autouml } from "../../typings/typings";
 import { mapFiles } from "./helpers";
 
-interface K {
-    good: boolean;
-}
-
-class X implements K {
-    good: boolean = true;
-}
-
 class FileMapper {
     private map: autouml.mapping.IScope;
     private currentScope: autouml.mapping.IScope;
     private numconstructors: number;
     private disallowNewFunctions: number;
-    private relations: autouml.mapping.IConnector[];
+    // private relations: autouml.mapping.IConnector[];
+    private relations: Map<
+        string,
+        Map<autouml.mapping.ConnectorType, Set<string>>
+    >;
 
     // NOTE: these two are not used by this class itself; they are passed
     // to helper functions. These are here for bookkeeping reasons
     private files: string[];
     private tsoptions: ts.CompilerOptions | {};
-    constructor(files: string[], tsoptions?: ts.CompilerOptions) {
+    constructor(
+        files: string[],
+        tsoptions?: ts.CompilerOptions
+    ) {
         this.map = {
             scopeType: autouml.mapping.ScopeType.PROGRAM,
             name: "program",
@@ -36,12 +35,31 @@ class FileMapper {
         this.tsoptions = tsoptions ?? {};
         this.files = files;
         this.disallowNewFunctions = 0;
-        this.relations = [];
+        this.relations = new Map();
     }
 
-    public mapFiles(): [autouml.mapping.IScope, autouml.mapping.IConnector[]] {
+    private getRelationsArray(): autouml.mapping.IConnector[] {
+        let ans: autouml.mapping.IConnector[] = [];
+        this.relations.forEach((maps, src) => {
+            maps.forEach((dests, type) => {
+                dests.forEach((dst) => {
+                    ans.push({
+                        src: JSON.parse(src),
+                        type,
+                        dst: JSON.parse(dst),
+                    });
+                });
+            });
+        });
+        return ans;
+    }
+
+    public mapFiles(): [
+        autouml.mapping.IScope,
+        autouml.mapping.IConnector[]
+    ] {
         mapFiles(this, this.tsoptions);
-        return [this.map, this.relations];
+        return [this.map, this.getRelationsArray()];
     }
 
     public getFiles(): Readonly<string[]> {
@@ -51,7 +69,10 @@ class FileMapper {
     public getCurrentFileName(): string {
         // go up the scope tree until you find one that is a file
         let s = this.currentScope;
-        while (s.scopeType != autouml.mapping.ScopeType.FILE && s != null) {
+        while (
+            s.scopeType != autouml.mapping.ScopeType.FILE &&
+            s != null
+        ) {
             let p = s.parent;
             if (p) {
                 s = p;
@@ -103,10 +124,14 @@ class FileMapper {
             if (scopeITSType) {
                 scope.selfType = scopeITSType;
             } else {
-                throw new MissingArgumentError("startScope");
+                throw new MissingArgumentError(
+                    "startScope"
+                );
             }
         }
-        this.currentScope.children.push(scope as autouml.mapping.IScope);
+        this.currentScope.children.push(
+            scope as autouml.mapping.IScope
+        );
         this.currentScope = scope;
     }
 
@@ -127,7 +152,10 @@ class FileMapper {
         }
     }
 
-    public addPropertySignature(name: string, type: autouml.mapping.ITSType) {
+    public addPropertySignature(
+        name: string,
+        type: autouml.mapping.ITSType
+    ) {
         if (scopeIsInterface(this.currentScope)) {
             this.currentScope.interfaceData.push({
                 name,
@@ -169,7 +197,11 @@ class FileMapper {
                 isConstructor: isConstructor,
             };
             if (isConstructor) {
-                this.currentScope.methods.splice(this.numconstructors, 0, obj);
+                this.currentScope.methods.splice(
+                    this.numconstructors,
+                    0,
+                    obj
+                );
                 this.numconstructors++;
             } else {
                 this.currentScope.methods.push(obj);
@@ -184,11 +216,22 @@ class FileMapper {
         type: autouml.mapping.ConnectorType,
         dst: autouml.mapping.ITSType
     ) {
-        this.relations.push({
-            src,
-            type,
-            dst,
-        });
+        if (!dst.isPrimitive && !src.isPrimitive) {
+            let srckey = JSON.stringify(src);
+            let dststring = JSON.stringify(dst);
+            // create src
+            if (!this.relations.has(srckey)) {
+                this.relations.set(srckey, new Map());
+            }
+            let connDict = this.relations.get(srckey)!;
+            // create dict if needed
+            if (!connDict.has(type)) {
+                connDict.set(type, new Set());
+            }
+            let dstSet = connDict.get(type)!;
+            // add dst to hash
+            dstSet.add(dststring);
+        }
     }
 
     // add connections to the current scope
@@ -198,14 +241,13 @@ class FileMapper {
         dst: autouml.mapping.ITSType
     ) {
         if (
-            scopeIsEnumInterfaceOrClass(this.currentScope) &&
-            !dst.isPrimitive
+            scopeIsEnumInterfaceOrClass(this.currentScope)
         ) {
-            this.relations.push({
-                src: this.currentScope.selfType,
+            this.addRelation(
+                this.currentScope.selfType,
                 type,
-                dst,
-            });
+                dst
+            );
         }
     }
 }
@@ -213,7 +255,9 @@ class FileMapper {
 function scopeIsInterface(
     s: autouml.mapping.IScope
 ): s is autouml.mapping.IInterfaceScope {
-    return s.scopeType === autouml.mapping.ScopeType.INTERFACE;
+    return (
+        s.scopeType === autouml.mapping.ScopeType.INTERFACE
+    );
 }
 
 function scopeIsClass(
@@ -236,7 +280,8 @@ function scopeIsEnumInterfaceOrClass(
     | autouml.mapping.IEnumScope {
     return (
         s.scopeType === autouml.mapping.ScopeType.CLASS ||
-        s.scopeType === autouml.mapping.ScopeType.INTERFACE ||
+        s.scopeType ===
+            autouml.mapping.ScopeType.INTERFACE ||
         s.scopeType === autouml.mapping.ScopeType.ENUM
     );
 }

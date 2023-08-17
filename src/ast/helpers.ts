@@ -187,6 +187,34 @@ function locateInterfaceType(
     return tor;
 }
 
+function isEnumType(
+    type: ts.Type
+): type is ts.InterfaceType {
+    function hasFlag(type: ts.Type, flag: ts.TypeFlags) {
+        return (type.flags & flag) === flag;
+    }
+    // if for some reason this returns true...
+    if (hasFlag(type, ts.TypeFlags.Enum)) return true;
+
+    // it's not an enum type if it's an enum literal type
+    if (
+        hasFlag(type, ts.TypeFlags.EnumLiteral) &&
+        !type.isUnion()
+    )
+        return false;
+
+    // get the symbol and check if its value declaration is an enum declaration
+    const symbol = type.getSymbol();
+    if (symbol == null) return false;
+
+    const { valueDeclaration } = symbol;
+    return (
+        valueDeclaration != null &&
+        valueDeclaration.kind ===
+            ts.SyntaxKind.EnumDeclaration
+    );
+}
+
 function tsTypeToAutoUMLType(
     currentFileName: string,
     checker: ts.TypeChecker,
@@ -198,7 +226,7 @@ function tsTypeToAutoUMLType(
     );
     //get the name
     tor.name = checker.typeToString(t);
-    if (t.isClassOrInterface()) {
+    if (t.isClassOrInterface() || isEnumType(t)) {
         tor.isPrimitive = false;
         tor.typeLocation = locateInterfaceType(
             currentFileName,

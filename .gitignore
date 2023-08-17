@@ -2,6 +2,8 @@
 *.d2
 *.svg
 
+# debug
+*.ast
 
 # Logs
 logs
