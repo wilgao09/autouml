@@ -4,10 +4,8 @@ on:
         branches: [main]
 
 jobs:
-    prints-usage:
+    print-usage:
         runs-on: ubuntu-latest
         steps:
-            - uses: ./github/actions/build-actions/builds-latest-version.yml
-            - run: npm publish
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+            - uses: ./.github/actions/build-action
+            - run: node dist/index.js --help
