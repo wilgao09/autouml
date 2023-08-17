@@ -15,5 +15,4 @@ jobs:
             ## build
             - run: npm ci
             - run: npm run build
-            - uses: ./.github/actions/build-action
             - run: node dist/index.js --help
