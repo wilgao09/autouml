@@ -1,5 +1,6 @@
 import { autouml } from "../../typings/typings";
-import Visitor from "../visitor";
+import { Visitor } from "../visitor";
+import { compileRelations } from "./arrows";
 
 function accessToPrefix(
     access: Set<autouml.mapping.AccessModifier>
@@ -33,7 +34,7 @@ function indentLines(lines: string[]): string[] {
     return lines;
 }
 
-export default class d2Codegen
+class d2Codegen
     extends Visitor
     implements autouml.codegen.CodeGenerator
 {
@@ -171,6 +172,10 @@ export default class d2Codegen
             }(${params}) : ${typeToString(m.type)}`,
         ];
     }
+
+    protected compileRelations(): string {
+        return compileRelations(this.relations);
+    }
 }
 
 function escapeName(s: string): string {
@@ -187,3 +192,5 @@ function typeToString(
         return t.name.replace(/[\[\]\.><]/g, "\\$&");
     }
 }
+
+export { d2Codegen };

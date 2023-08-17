@@ -444,9 +444,6 @@ function mapFiles(
             // for interface index signature members
             case ts.SyntaxKind.IndexSignature: {
                 if (ts.isIndexSignatureDeclaration(node)) {
-                    console.log(
-                        `CHILDREN COUNT: ${node.getChildCount()}`
-                    );
                     let t = tsTypeToAutoUMLType(
                         mapper.getCurrentFileName(),
                         checker,

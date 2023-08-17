@@ -1,13 +1,15 @@
 import { autouml } from "../typings/typings";
-import { compileRelations } from "./d2/arrows";
 
+/**
+ *
+ */
 export class VisitingMapNotDefinedError extends Error {
     constructor() {
         super("Tried visiting the nodes of a null map");
     }
 }
 
-export default abstract class Visitor {
+abstract class Visitor {
     map: autouml.mapping.IScope | null;
     relations: autouml.mapping.IConnector[];
     constructor(
@@ -41,7 +43,7 @@ export default abstract class Visitor {
         }
         return (
             this._visit(this.map).join("\n") +
-            `\n${compileRelations(this.relations)}`
+            `\n${this.compileRelations()}`
         );
     }
 
@@ -156,4 +158,8 @@ export default abstract class Visitor {
     protected abstract visitClassMethod(
         m: autouml.mapping.IClassMethods
     ): string[];
+
+    protected abstract compileRelations(): string;
 }
+
+export { Visitor };

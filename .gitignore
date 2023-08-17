@@ -5,6 +5,9 @@
 # debug
 *.ast
 
+#docs
+docs/
+
 # Logs
 logs
 *.log
