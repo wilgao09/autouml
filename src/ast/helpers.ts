@@ -391,34 +391,47 @@ function mapFiles(
                 break;
             }
 
+            // for interface members
             case ts.SyntaxKind.PropertySignature: {
-                // for interfaces at least
                 if (ts.isPropertySignature(node)) {
+                    let t = tsTypeToAutoUMLType(
+                        mapper.getCurrentFileName(),
+                        checker,
+                        checker.getTypeAtLocation(node)
+                    );
                     mapper.addPropertySignature(
                         node.name.getText(),
-                        tsTypeToAutoUMLType(
-                            mapper.getCurrentFileName(),
-                            checker,
-                            checker.getTypeAtLocation(node)
-                        )
+                        t
+                    );
+                    mapper.addCurrentScopeRelation(
+                        autouml.mapping.ConnectorType
+                            .AGGREGATES,
+                        t
                     );
                 }
 
                 break;
             }
 
+            // for class members
             case ts.SyntaxKind.PropertyDeclaration: {
                 if (ts.isPropertyDeclaration(node)) {
+                    let t = tsTypeToAutoUMLType(
+                        mapper.getCurrentFileName(),
+                        checker,
+                        checker.getTypeAtLocation(node)
+                    );
                     mapper.addPropertyDeclaration(
                         node.name?.getText(),
                         modifierlistToModifierSet(
                             node.modifiers
                         ),
-                        tsTypeToAutoUMLType(
-                            mapper.getCurrentFileName(),
-                            checker,
-                            checker.getTypeAtLocation(node)
-                        )
+                        t
+                    );
+                    mapper.addCurrentScopeRelation(
+                        autouml.mapping.ConnectorType
+                            .AGGREGATES,
+                        t
                     );
                 }
                 break;
