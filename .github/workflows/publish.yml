@@ -1,8 +1,7 @@
 name: publish
 on:
-    push:
-        branches: [main]
-
+    release:
+        types: [published]
 jobs:
     publish-to-npm:
         runs-on: ubuntu-latest
@@ -16,6 +15,6 @@ jobs:
             ## build
             - run: npm ci
             - run: npm run build
-            - run: npm publish || true
+            - run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
