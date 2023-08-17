@@ -139,7 +139,11 @@ export default class d2Codegen
     protected visitInterfaceField(
         f: autouml.mapping.IParam
     ): string[] {
-        return [`+${f.name} : ${typeToString(f.type)}`];
+        return [
+            `+${escapeName(f.name)} : ${typeToString(
+                f.type
+            )}`,
+        ];
     }
     protected visitClassField(
         f: autouml.mapping.IClassField
@@ -167,6 +171,10 @@ export default class d2Codegen
             }(${params}) : ${typeToString(m.type)}`,
         ];
     }
+}
+
+function escapeName(s: string): string {
+    return s.replace(/[\[\]:]/g, "\\$&");
 }
 
 function typeToString(

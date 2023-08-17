@@ -79,7 +79,23 @@ function generateUsageMessage(
     return usage.join("\n");
 }
 
-let commandLineArgs = util.parseArgs(PARSE_ARGS_CONFIG);
+let commandLineArgs: {
+    values: {
+        [x: string]:
+            | string
+            | boolean
+            | (string | boolean)[]
+            | undefined;
+    };
+    positionals: string[] | [];
+};
+try {
+    commandLineArgs = util.parseArgs(PARSE_ARGS_CONFIG);
+} catch (e: any) {
+    console.error(`${e}`);
+    console.error(generateUsageMessage(PARSE_ARGS_CONFIG));
+    process.exit(1);
+}
 
 let flags = commandLineArgs.values;
 

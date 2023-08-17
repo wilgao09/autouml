@@ -201,7 +201,7 @@ function isEnumType(
         hasFlag(type, ts.TypeFlags.EnumLiteral) &&
         !type.isUnion()
     )
-        return false;
+        return true;
 
     // get the symbol and check if its value declaration is an enum declaration
     const symbol = type.getSymbol();
@@ -431,6 +431,34 @@ function mapFiles(
                         node.name.getText(),
                         t
                     );
+                    mapper.addCurrentScopeRelation(
+                        autouml.mapping.ConnectorType
+                            .AGGREGATES,
+                        t
+                    );
+                }
+
+                break;
+            }
+
+            // for interface index signature members
+            case ts.SyntaxKind.IndexSignature: {
+                if (ts.isIndexSignatureDeclaration(node)) {
+                    console.log(
+                        `CHILDREN COUNT: ${node.getChildCount()}`
+                    );
+                    let t = tsTypeToAutoUMLType(
+                        mapper.getCurrentFileName(),
+                        checker,
+                        checker.getTypeAtLocation(
+                            node.getChildAt(4)
+                        )
+                    );
+                    let name = `[${node
+                        .getChildAt(1)
+                        .getText()
+                        .replace(/ /g, "")}]`;
+                    mapper.addPropertySignature(name, t);
                     mapper.addCurrentScopeRelation(
                         autouml.mapping.ConnectorType
                             .AGGREGATES,
