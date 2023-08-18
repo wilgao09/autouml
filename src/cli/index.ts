@@ -6,7 +6,6 @@
 
 import * as util from "node:util";
 import { autouml } from "../../typings/typings";
-import { buildUML } from "./buildUML";
 
 /**
  * Valid command line arguments. This object details all flags and their uses, and the program overall usage statement
