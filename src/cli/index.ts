@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+"use strict";
 /**
  * Main entry into the program
  */
@@ -156,11 +158,15 @@ function createOptionsFromCLI(): autouml.cli.IOptions | null {
     return options;
 }
 
-if (require.main === module) {
-    let options = createOptionsFromCLI();
-    if (options) {
-        buildUML(options);
-    }
-}
+// if (require.main === module) {
+//     let options = createOptionsFromCLI();
+//     if (options) {
+//         buildUML(options);
+//     }
+// }
 
-export { PARSE_ARGS_CONFIG, generateUsageMessage };
+export {
+    PARSE_ARGS_CONFIG,
+    generateUsageMessage,
+    createOptionsFromCLI,
+};

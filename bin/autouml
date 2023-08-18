@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+
+let mainCLI = require("../dist/cli/index");
+let builder = require("../dist/cli/buildUML");
+
+let options = mainCLI.createOptionsFromCLI();
+if (options) {
+    builder.buildUML(options);
+}

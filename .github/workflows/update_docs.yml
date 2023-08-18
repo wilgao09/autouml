@@ -1,0 +1,23 @@
+name: update-netlify-docs
+on:
+    push:
+        branches: [main]
+
+jobs:
+    update-dev-docs:
+        runs-on: ubuntu-latest
+        steps:
+            ## checkout
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: "latest"
+                  registry-url: https://registry.npmjs.org/
+            ## build
+            - run: npm ci
+            - run: npm run build
+            ## generate docs
+            - run: npm run docs
+
+            ##
+            - run: npx netlify deploy --prod --dir ./docs --site ${{ secrets.DEV_DOCS_SITE_ID }} --auth ${{ secrets.NETLIFY_SECRET }}

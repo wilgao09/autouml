@@ -25,3 +25,5 @@ This project can expand in a few directions. The following are a few directions 
 ## Known Issues
 
 The following is a lsit of currently known issues.
+
+-   Type parameters not being used in connections
