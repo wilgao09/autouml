@@ -31,7 +31,9 @@ function typeToString(t: autouml.mapping.ITSType): string {
     }
     return `${normalize(
         path.normalize(t.typeLocation.fileName)
-    )}.${t.typeLocation.namespaceNest.join(".")}`;
+    )}.${t.typeLocation.namespaceNest
+        .join(".")
+        .replace(/[()]/g, "\\$&")}`;
 }
 
 import connType = autouml.mapping.ConnectorType;

@@ -2,7 +2,7 @@ import ts, { isEnumDeclaration } from "typescript";
 import { readFileSync } from "fs";
 import { MissingArgumentError } from "./MissingArgumentError";
 import { autouml } from "../../typings/typings";
-import { mapFiles } from "./helpers";
+import { TypeScraper } from "./TypeScraper";
 
 class FileMapper {
     private map: autouml.mapping.IScope;
@@ -58,12 +58,16 @@ class FileMapper {
         autouml.mapping.IScope,
         autouml.mapping.IConnector[]
     ] {
-        mapFiles(this, this.tsoptions);
+        let s = new TypeScraper(this);
+        s.run();
         return [this.map, this.getRelationsArray()];
     }
 
     public getFiles(): Readonly<string[]> {
         return this.files;
+    }
+    public getTSOptions(): ts.CompilerOptions {
+        return this.tsoptions;
     }
 
     public getCurrentFileName(): string {
