@@ -6,6 +6,7 @@
 
 import * as util from "node:util";
 import { autouml } from "../../typings/typings";
+import { buildUML } from "./buildUML";
 
 /**
  * Valid command line arguments. This object details all flags and their uses, and the program overall usage statement
@@ -157,12 +158,12 @@ function createOptionsFromCLI(): autouml.cli.IOptions | null {
     return options;
 }
 
-// if (require.main === module) {
-//     let options = createOptionsFromCLI();
-//     if (options) {
-//         buildUML(options);
-//     }
-// }
+if (require.main === module) {
+    let options = createOptionsFromCLI();
+    if (options) {
+        buildUML(options);
+    }
+}
 
 export {
     PARSE_ARGS_CONFIG,

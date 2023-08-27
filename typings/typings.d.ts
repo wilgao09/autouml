@@ -62,7 +62,7 @@ export namespace autouml {
             name: string;
             children: Array<IScope>;
             parent: IScope | null;
-            connectors: Array<IConnector>;
+            // connectors: Array<IConnector>;
         }
         interface IInterfaceScope extends IScope {
             interfaceData: IParam[];

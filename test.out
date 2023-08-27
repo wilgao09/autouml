@@ -1,0 +1,68 @@
+[0m[7m[1m[31m FAIL [39m[22m[27m[0m [2mtest/indexSignatureTest/[22m[1mmain.test.ts[22m
+  [1m● [22mTest suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'getDeclarations')
+
+    [0m [90m 221 |[39m     [36mreturn[39m [33m![39m([0m
+    [0m [90m 222 |[39m         t[33m.[39msymbol[0m
+    [0m[31m[1m>[22m[39m[90m 223 |[39m             [33m.[39mgetDeclarations()[0m
+    [0m [90m     |[39m              [31m[1m^[22m[39m[0m
+    [0m [90m 224 |[39m             [33m?[39m[33m.[39msome((s) [33m=>[39m[0m
+    [0m [90m 225 |[39m                 s[0m
+    [0m [90m 226 |[39m                     [33m.[39mgetSourceFile()[0m
+
+      [2mat tsTypeIsNotFromLib ([22msrc/ast/helpers.ts[2m:223:14)[22m
+      [2mat tsTypeToAutoUMLType ([22msrc/ast/helpers.ts[2m:248:9)[22m
+      [2mat mapNode ([22msrc/ast/helpers.ts[2m:467:29)[22m
+      [2mat visitNodes ([22mnode_modules/typescript/lib/typescript.js[2m:27716:24)[22m
+      [2mat forEachChildInInterfaceDeclaration ([22mnode_modules/typescript/lib/typescript.js[2m:28405:203)[22m
+      [2mat Object.forEachChild ([22mnode_modules/typescript/lib/typescript.js[2m:27801:37)[22m
+      [2mat makeScope ([22msrc/ast/helpers.ts[2m:92:8)[22m
+      [2mat mapNode ([22msrc/ast/helpers.ts[2m:422:24)[22m
+      [2mat visitNodes ([22mnode_modules/typescript/lib/typescript.js[2m:27716:24)[22m
+      [2mat forEachChildInSourceFile ([22mnode_modules/typescript/lib/typescript.js[2m:28338:18)[22m
+      [2mat Object.forEachChild ([22mnode_modules/typescript/lib/typescript.js[2m:27801:37)[22m
+      [2mat mapNode ([22msrc/ast/helpers.ts[2m:592:12)[22m
+      [2mat [22msrc/ast/helpers.ts[2m:367:13[22m
+          at Array.forEach (<anonymous>)
+      [2mat mapFiles ([22msrc/ast/helpers.ts[2m:354:30)[22m
+      [2mat FileMapper.Object.<anonymous>.FileMapper.mapFiles ([22msrc/ast/FileMapper.ts[2m:61:17)[22m
+      [2mat [22m[0m[36mtest/indexSignatureTest/main.test.ts[39m[0m[2m:10:34[22m
+      [2mat Object.<anonymous> ([22m[0m[36mtest/indexSignatureTest/main.test.ts[39m[0m[2m:5:1)[22m
+
+[0m[7m[1m[31m FAIL [39m[22m[27m[0m [2mtest/fieldsPTypes/[22m[1mmain.test.ts[22m ([0m[1m[41m11.373 s[49m[22m[0m)
+[1m[31m  [1m● [22m[1mparameters are in all relevant data structures › the created ast has them[39m[22m
+
+    TypeError: Cannot read properties of undefined (reading 'getDeclarations')
+[2m[22m
+[2m    [0m [90m 221 |[39m     [36mreturn[39m [33m![39m([0m[22m
+[2m    [0m [90m 222 |[39m         t[33m.[39msymbol[0m[22m
+[2m    [0m[31m[1m>[22m[2m[39m[90m 223 |[39m             [33m.[39mgetDeclarations()[0m[22m
+[2m    [0m [90m     |[39m              [31m[1m^[22m[2m[39m[0m[22m
+[2m    [0m [90m 224 |[39m             [33m?[39m[33m.[39msome((s) [33m=>[39m[0m[22m
+[2m    [0m [90m 225 |[39m                 s[0m[22m
+[2m    [0m [90m 226 |[39m                     [33m.[39mgetSourceFile()[0m[22m
+[2m[22m
+[2m      [2mat tsTypeIsNotFromLib ([22m[2msrc/ast/helpers.ts[2m:223:14)[22m[2m[22m
+[2m      [2mat tsTypeToAutoUMLType ([22m[2msrc/ast/helpers.ts[2m:248:9)[22m[2m[22m
+[2m      [2mat mapNode ([22m[2msrc/ast/helpers.ts[2m:445:29)[22m[2m[22m
+[2m      [2mat visitNodes ([22m[2mnode_modules/typescript/lib/typescript.js[2m:27716:24)[22m[2m[22m
+[2m      [2mat forEachChildInInterfaceDeclaration ([22m[2mnode_modules/typescript/lib/typescript.js[2m:28405:203)[22m[2m[22m
+[2m      [2mat Object.forEachChild ([22m[2mnode_modules/typescript/lib/typescript.js[2m:27801:37)[22m[2m[22m
+[2m      [2mat makeScope ([22m[2msrc/ast/helpers.ts[2m:92:8)[22m[2m[22m
+[2m      [2mat mapNode ([22m[2msrc/ast/helpers.ts[2m:422:24)[22m[2m[22m
+[2m      [2mat visitNodes ([22m[2mnode_modules/typescript/lib/typescript.js[2m:27716:24)[22m[2m[22m
+[2m      [2mat forEachChildInSourceFile ([22m[2mnode_modules/typescript/lib/typescript.js[2m:28338:18)[22m[2m[22m
+[2m      [2mat Object.forEachChild ([22m[2mnode_modules/typescript/lib/typescript.js[2m:27801:37)[22m[2m[22m
+[2m      [2mat mapNode ([22m[2msrc/ast/helpers.ts[2m:592:12)[22m[2m[22m
+[2m      [2mat [22m[2msrc/ast/helpers.ts[2m:367:13[22m[2m[22m
+[2m          at Array.forEach (<anonymous>)[22m
+[2m      [2mat mapFiles ([22m[2msrc/ast/helpers.ts[2m:354:30)[22m[2m[22m
+[2m      [2mat FileMapper.Object.<anonymous>.FileMapper.mapFiles ([22m[2msrc/ast/FileMapper.ts[2m:61:17)[22m[2m[22m
+[2m      [2mat Object.<anonymous> ([22m[2m[0m[36mtest/fieldsPTypes/main.test.ts[39m[0m[2m:11:38)[22m[2m[22m
+
+[1mTest Suites: [22m[1m[31m2 failed[39m[22m, 2 total
+[1mTests:       [22m[1m[31m1 failed[39m[22m, 1 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        [1m[33m12.622 s[39m[22m
+[2mRan all test suites[22m[2m.[22m

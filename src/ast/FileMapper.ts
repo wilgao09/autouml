@@ -28,7 +28,7 @@ class FileMapper {
             name: "program",
             children: [],
             parent: null,
-            connectors: [],
+            // connectors: [],
         };
         this.currentScope = this.map;
         this.numconstructors = 0;
@@ -231,6 +231,11 @@ class FileMapper {
             let dstSet = connDict.get(type)!;
             // add dst to hash
             dstSet.add(dststring);
+
+            // check if it has parameters
+            for (let p of dst.typeParameters) {
+                this.addRelation(src, type, p);
+            }
         }
     }
 

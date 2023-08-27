@@ -131,10 +131,10 @@ const DEFAULT_TYPE: autouml.mapping.ITSType = {
     typeParameters: [],
 };
 
-function locateInterfaceType(
+function locateType(
     currentFileName: string,
     checker: ts.TypeChecker,
-    i: ts.InterfaceType
+    i: ts.Type
 ): autouml.mapping.ITSTypeLocation {
     let tor: autouml.mapping.ITSTypeLocation = {
         fileName: currentFileName,
@@ -215,6 +215,42 @@ function isEnumType(
     );
 }
 
+function isUserDefinedType(type: ts.Type): boolean {
+    // Check if the type is an object type with Class or Interface flag
+    if ((type.flags & ts.TypeFlags.Object) !== 0) {
+        const symbol = type.getSymbol();
+        let decls = symbol?.getDeclarations();
+        if (!decls) {
+            return false;
+        }
+        return (
+            (ts.getCombinedModifierFlags(decls[0]) &
+                ts.ModifierFlags
+                    .NonPublicAccessibilityModifier) ===
+            0
+        );
+    }
+
+    // Check if the type is an enum type
+    if ((type.flags & ts.TypeFlags.Enum) !== 0) {
+        return true;
+    }
+
+    // Check if the type is a union or intersection type
+    if (
+        (type.flags & ts.TypeFlags.UnionOrIntersection) !==
+        0
+    ) {
+        let t = type as ts.UnionOrIntersectionType;
+        // You might want to check individual members of the union or intersection
+        return t.types.some((memberType) =>
+            isUserDefinedType(memberType)
+        );
+    }
+
+    return false;
+}
+
 function tsTypeToAutoUMLType(
     currentFileName: string,
     checker: ts.TypeChecker,
@@ -226,9 +262,10 @@ function tsTypeToAutoUMLType(
     );
     //get the name
     tor.name = checker.typeToString(t);
-    if (t.isClassOrInterface() || isEnumType(t)) {
+    if (isUserDefinedType(t) || isEnumType(t)) {
+        // if (t.isClassOrInterface() || isEnumType(t)) {
         tor.isPrimitive = false;
-        tor.typeLocation = locateInterfaceType(
+        tor.typeLocation = locateType(
             currentFileName,
             checker,
             t

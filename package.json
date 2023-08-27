@@ -20,8 +20,12 @@
         "url": "git+https://github.com/wilgao09/autouml.git"
     },
     "keywords": [
+        "typescript",
         "d2",
-        "UML"
+        "developer-tools",
+        "software-architecture",
+        "UML",
+        "uml-class-diagram"
     ],
     "author": "William Gao",
     "license": "MIT",
