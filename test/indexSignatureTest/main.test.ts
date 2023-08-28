@@ -4,8 +4,22 @@ import { readFile } from "../../src/debugging/ast";
 
 describe("index signature tests with simple", () => {
     let mapper = new FileMapper(
-        ["./test/indexSignatureTest/simple.ts"],
-        {}
+        {
+            options: {},
+            fileNames: [
+                "./test/indexSignatureTest/simple.ts",
+            ],
+            errors: [],
+        },
+        {
+            baseDir: "./test/indexSignatureTest",
+            tsconfigFileName: "tsconfig.json",
+            outPath: "./test/indexSignatureTest",
+            target: autouml.codegen.Target.d2,
+            verbose: false,
+            debugASTPath:
+                "./test/indexSignatureTest/debug.ast",
+        }
     );
     let [scopes, conns] = mapper.mapFiles();
 

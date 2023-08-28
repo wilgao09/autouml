@@ -50,6 +50,11 @@ const wellKnownTypesArray = [
     "Reflect",
     "Proxy",
     "Intl",
+    // i dont know what these are
+    "(Anonymous function)",
+    "_object",
+    "obj",
+    "_type",
 ];
 
 const wellKnownTypesSet = new Set(wellKnownTypesArray);

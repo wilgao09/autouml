@@ -22,7 +22,13 @@ interface IArrowStyle {
 }
 
 function normalize(s: string): string {
-    return s.replace(/[:\.\\]/g, "\\$&");
+    return s
+        .replace(/\./g, "\\.")
+        .replace(/\\(?!\.)/g, ".")
+        .replace(/\/(?!\.)/g, ".")
+        .split(/(?<!\\)\./g)
+        .map((x) => `"${x}"`)
+        .join(".");
 }
 
 function typeToString(t: autouml.mapping.ITSType): string {

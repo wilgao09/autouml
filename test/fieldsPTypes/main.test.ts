@@ -5,9 +5,24 @@ import * as path from "path";
 
 describe("parameters are in all relevant data structures", () => {
     test("the created ast has them", () => {
-        let mapper = new FileMapper([
-            "./test/fieldsPTypes/simple.ts",
-        ]);
+        let mapper = new FileMapper(
+            {
+                options: {},
+                fileNames: [
+                    "./test/fieldsPTypes/simple.ts",
+                ],
+                errors: [],
+            },
+            {
+                baseDir: "./test/fieldsPTypes",
+                tsconfigFileName: "tsconfig.json",
+                outPath: "./test/fieldsPTypes",
+                target: autouml.codegen.Target.d2,
+                verbose: false,
+                debugASTPath:
+                    "./test/fieldsPTypes/debug.ast",
+            }
+        );
         let [scopes, conns] = mapper.mapFiles();
         // console.log(
         //     util.inspect(scopes, {
@@ -26,13 +41,9 @@ describe("parameters are in all relevant data structures", () => {
                                 isPrimitive: false,
                                 typeParameters: [],
                                 typeLocation: {
-                                    fileName: path.resolve(
-                                        "./test/fieldsPTypes/simple.ts"
-                                    ),
+                                    fileName: "simple.ts",
                                     duplicatedIn: [
-                                        path.resolve(
-                                            "./test/fieldsPTypes/simple.ts"
-                                        ),
+                                        "simple.ts",
                                     ],
                                     namespaceNest: ["I1"],
                                 },
@@ -44,13 +55,9 @@ describe("parameters are in all relevant data structures", () => {
                                 isPrimitive: false,
                                 typeParameters: [],
                                 typeLocation: {
-                                    fileName: path.resolve(
-                                        "./test/fieldsPTypes/simple.ts"
-                                    ),
+                                    fileName: "simple.ts",
                                     duplicatedIn: [
-                                        path.resolve(
-                                            "./test/fieldsPTypes/simple.ts"
-                                        ),
+                                        "simple.ts",
                                     ],
                                     namespaceNest: ["I2"],
                                 },

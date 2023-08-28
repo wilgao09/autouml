@@ -17,11 +17,11 @@ class FileMapper {
 
     // NOTE: these two are not used by this class itself; they are passed
     // to helper functions. These are here for bookkeeping reasons
-    private files: string[];
-    private tsoptions: ts.CompilerOptions | {};
+    private tsoptions: ts.ParsedCommandLine;
+    private umloptions: autouml.cli.IOptions;
     constructor(
-        files: string[],
-        tsoptions?: ts.CompilerOptions
+        tsoptions: ts.ParsedCommandLine,
+        umloptions: autouml.cli.IOptions
     ) {
         this.map = {
             scopeType: autouml.mapping.ScopeType.PROGRAM,
@@ -32,8 +32,8 @@ class FileMapper {
         };
         this.currentScope = this.map;
         this.numconstructors = 0;
-        this.tsoptions = tsoptions ?? {};
-        this.files = files;
+        this.tsoptions = tsoptions;
+        this.umloptions = umloptions;
         this.disallowNewFunctions = 0;
         this.relations = new Map();
     }
@@ -64,10 +64,13 @@ class FileMapper {
     }
 
     public getFiles(): Readonly<string[]> {
-        return this.files;
+        return this.tsoptions.fileNames;
     }
-    public getTSOptions(): ts.CompilerOptions {
+    public getTSOptions(): ts.ParsedCommandLine {
         return this.tsoptions;
+    }
+    public getUMLOptions(): autouml.cli.IOptions {
+        return this.umloptions;
     }
 
     public getCurrentFileName(): string {

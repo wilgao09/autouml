@@ -5,9 +5,21 @@ import * as path from "path";
 
 describe("enums are represented properly", () => {
     test("enums are represented", () => {
-        let mapper = new FileMapper([
-            "./test/enums/simple.ts",
-        ]);
+        let mapper = new FileMapper(
+            {
+                options: {},
+                fileNames: ["./test/enums/simple.ts"],
+                errors: [],
+            },
+            {
+                baseDir: "./test/enums",
+                tsconfigFileName: "tsconfig.json",
+                outPath: "./test/enums",
+                target: autouml.codegen.Target.d2,
+                verbose: false,
+                debugASTPath: "./test/enums/debug.ast",
+            }
+        );
         let [scopes, conns] = mapper.mapFiles();
         // we expect to find an enum here
         let e = scopes.children[0].children[0];
@@ -21,9 +33,21 @@ describe("enums are represented properly", () => {
         });
     });
     test("enums are treated as nonprimitives", () => {
-        let mapper = new FileMapper([
-            "./test/enums/simple.ts",
-        ]);
+        let mapper = new FileMapper(
+            {
+                options: {},
+                fileNames: ["./test/enums/simple.ts"],
+                errors: [],
+            },
+            {
+                baseDir: "./test/enums",
+                tsconfigFileName: "tsconfig.json",
+                outPath: "./test/enums",
+                target: autouml.codegen.Target.d2,
+                verbose: false,
+                debugASTPath: "./test/enums/debug.ast",
+            }
+        );
         let [scopes, conns] = mapper.mapFiles();
         expect(conns).toEqual(
             expect.arrayContaining([
@@ -34,14 +58,8 @@ describe("enums are represented properly", () => {
                             isPrimitive: false,
                             typeParameters: [],
                             typeLocation: {
-                                fileName: path.resolve(
-                                    "./test/enums/simple.ts"
-                                ),
-                                duplicatedIn: [
-                                    path.resolve(
-                                        "./test/enums/simple.ts"
-                                    ),
-                                ],
+                                fileName: "simple.ts",
+                                duplicatedIn: ["simple.ts"],
                                 namespaceNest: ["L"],
                             },
                         },
@@ -52,14 +70,8 @@ describe("enums are represented properly", () => {
                             isPrimitive: false,
                             typeParameters: [],
                             typeLocation: {
-                                fileName: path.resolve(
-                                    "./test/enums/simple.ts"
-                                ),
-                                duplicatedIn: [
-                                    path.resolve(
-                                        "./test/enums/simple.ts"
-                                    ),
-                                ],
+                                fileName: "simple.ts",
+                                duplicatedIn: ["simple.ts"],
                                 namespaceNest: ["E"],
                             },
                         },

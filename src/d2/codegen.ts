@@ -59,10 +59,13 @@ class d2Codegen
     ): string[] {
         let lines = childData.flat();
         return [
-            `${scope.name.replace(
-                /[\[\]\.><\\:]/g,
-                "\\$&"
-            )} {`,
+            `${scope.name
+                .replace(/\./g, "\\.")
+                .replace(/\\(?!\.)/g, ".")
+                .replace(/\/(?!\.)/g, ".")
+                .split(/(?<!\\)\./g)
+                .map((x) => `"${x}"`)
+                .join(".")} {`,
             ...indentLines(lines),
             `}`,
         ];

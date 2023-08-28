@@ -58,10 +58,15 @@ function buildUML(options: autouml.cli.IOptions) {
     verbose("Found tsconfig");
     // get map of the project
     verbose("Constructing mapper");
-    let mapper = new FileMapper([
-        ...tsconfig.fileNames,
-        `${options.baseDir}/typings/**.ts`,
-    ]);
+    // TODO: dont hardcode this
+    let mapper = new FileMapper(
+        // [
+        //     ...tsconfig.fileNames,
+        //     `${options.baseDir}/typings/**.ts`,
+        // ],
+        tsconfig,
+        options
+    );
     verbose("Mapping files");
     let [programMap, programConnectors] = mapper.mapFiles();
     // compile to target

@@ -155,6 +155,7 @@ class TypeScraper {
 
         this.fileMap = new Map<string, boolean>();
         this.files = [];
+        // console.log(mapper.getFiles());
         for (let p of mapper.getFiles()) {
             let fils = globSync(p, {
                 ignore: "node_modules/**",
@@ -167,7 +168,7 @@ class TypeScraper {
         // let mapper = new FileMapper(files);
         this.program = ts.createProgram(
             this.files,
-            this.mapper.getTSOptions()
+            this.mapper.getTSOptions().options
         );
         this.checker = this.program.getTypeChecker();
     }
@@ -187,7 +188,11 @@ class TypeScraper {
                 );
                 if (this.fileMap.get(fname)) {
                     this.mapper.startScope(
-                        fname,
+                        path.relative(
+                            this.mapper.getUMLOptions()
+                                .baseDir,
+                            fname
+                        ),
                         autouml.mapping.ScopeType.FILE
                     );
                     this.mapNode(sourceFile);
@@ -228,7 +233,7 @@ class TypeScraper {
             let fragments = fullName.split('"');
             //the declaration is out of this file
             if (fragments[0] === "") {
-                tor.fileName = fragments[1];
+                // tor.fileName = fragments[1];
                 // note that fragments[1] is missing the file extnesion!!!
 
                 // isolate the namespace nesting
@@ -245,7 +250,8 @@ class TypeScraper {
 
             if (decls) {
                 decls.forEach((x) => {
-                    let p = path.resolve(
+                    let p = path.relative(
+                        this.mapper.getUMLOptions().baseDir,
                         x.getSourceFile().fileName
                     );
                     if (tor.fileName === "") {
