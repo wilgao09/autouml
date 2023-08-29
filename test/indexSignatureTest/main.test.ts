@@ -19,6 +19,7 @@ describe("index signature tests with simple", () => {
             verbose: false,
             debugASTPath:
                 "./test/indexSignatureTest/debug.ast",
+            includeNodeModules: false,
         }
     );
     let [scopes, conns] = mapper.mapFiles();

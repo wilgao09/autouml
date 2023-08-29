@@ -50,6 +50,12 @@ const PARSE_ARGS_CONFIG: autouml.cli.IParseArgsConfig = {
             description:
                 "set the output file for the produced AST",
         },
+        includeNodeModules: {
+            type: "boolean",
+            short: "n",
+            description:
+                "include references to types in node modules",
+        },
     },
 } as const;
 
@@ -89,6 +95,16 @@ function generateUsageMessage(
     return usage.join("\n");
 }
 
+const DEFAULT_UML_OPTIONS: Readonly<autouml.cli.IOptions> =
+    {
+        baseDir: "./",
+        tsconfigFileName: "tsconfig.json",
+        outPath: "./uml.d2",
+        target: autouml.codegen.Target.d2,
+        verbose: false,
+        debugASTPath: "",
+        includeNodeModules: false,
+    };
 /**
  * Create the options object based on command line arguments. This is expected to only be called from direct invocation of this script.
  * @returns an options object, or null if parsing failed or help was invoked
@@ -124,19 +140,17 @@ function createOptionsFromCLI(): autouml.cli.IOptions | null {
         return null;
     }
 
-    const options: autouml.cli.IOptions = {
-        baseDir: "./",
-        tsconfigFileName: "tsconfig.json",
-        outPath: "./uml.d2",
-        target: autouml.codegen.Target.d2,
-        verbose: false,
-        debugASTPath: "",
-    };
+    const options: autouml.cli.IOptions = structuredClone(
+        DEFAULT_UML_OPTIONS
+    );
 
     // TODO: change options object based on command line inputs
 
     if (flags.verbose) {
         options.verbose = true;
+    }
+    if (flags.includeNodeModules) {
+        options.includeNodeModules = true;
     }
 
     if (flags.baseDir) {
@@ -155,6 +169,7 @@ function createOptionsFromCLI(): autouml.cli.IOptions | null {
     if (flags.debugASTPath) {
         options.debugASTPath = flags.debugASTPath as string;
     }
+
     return options;
 }
 
@@ -169,4 +184,5 @@ export {
     PARSE_ARGS_CONFIG,
     generateUsageMessage,
     createOptionsFromCLI,
+    DEFAULT_UML_OPTIONS,
 };

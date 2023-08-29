@@ -53,6 +53,7 @@ const wellKnownTypesArray = [
     // i dont know what these are
     "(Anonymous function)",
     "_object",
+    "__object",
     "obj",
     "_type",
 ];

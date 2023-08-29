@@ -67,8 +67,10 @@ function buildUML(options: autouml.cli.IOptions) {
         tsconfig,
         options
     );
+
     verbose("Mapping files");
     let [programMap, programConnectors] = mapper.mapFiles();
+    verbose(inspect(mapper.getRelations()));
     // compile to target
     verbose("Selecting code generator");
     let visitor: Visitor;

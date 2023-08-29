@@ -6,6 +6,7 @@ import * as util from "util";
 import * as path from "path";
 import { globSync } from "glob";
 import { wellKnownTypesSet } from "./wellknown";
+import { from_node_modules } from "./helpers";
 
 const DEFAULT_TYPE: autouml.mapping.ITSType = {
     name: "any",
@@ -145,7 +146,7 @@ function isUserDefinedType(type: ts.Type): boolean {
 }
 
 class TypeScraper {
-    fileMap: Map<string, boolean>;
+    // fileMap: Map<string, boolean>;
     files: string[];
     program: ts.Program;
     checker: ts.TypeChecker;
@@ -153,7 +154,7 @@ class TypeScraper {
     constructor(mapper: FileMapper) {
         this.mapper = mapper;
 
-        this.fileMap = new Map<string, boolean>();
+        // this.fileMap = new Map<string, boolean>();
         this.files = [];
         // console.log(mapper.getFiles());
         for (let p of mapper.getFiles()) {
@@ -162,7 +163,7 @@ class TypeScraper {
             });
             for (let f of fils) {
                 this.files.push(f);
-                this.fileMap.set(path.resolve(f), true);
+                // this.fileMap.set(path.resolve(f), true);
             }
         }
         // let mapper = new FileMapper(files);
@@ -186,7 +187,12 @@ class TypeScraper {
                 let fname = path.resolve(
                     sourceFile.fileName
                 );
-                if (this.fileMap.get(fname)) {
+                if (
+                    // this.fileMap.get(fname)
+                    this.mapper.getUMLOptions()
+                        .includeNodeModules ||
+                    !from_node_modules(fname)
+                ) {
                     this.mapper.startScope(
                         path.relative(
                             this.mapper.getUMLOptions()
@@ -315,11 +321,20 @@ class TypeScraper {
         callExpr: ts.CallExpression
     ): autouml.mapping.ITSType[] {
         let tor: autouml.mapping.ITSType[] = [];
-        tor = callExpr.arguments.map((arg) =>
-            this.tsTypeToAutoUMLType(
-                this.checker.getTypeAtLocation(arg)
-            )
-        );
+        for (let arg of callExpr.arguments) {
+            let t = this.checker.getTypeAtLocation(arg);
+            if (t.getCallSignatures().length === 0) {
+                tor.push(this.tsTypeToAutoUMLType(t));
+            }
+        }
+        // tor = callExpr.arguments.map((arg) => {
+        //     let t = this.checker.getTypeAtLocation(arg)
+        //     if (t.)
+        //     this.tsTypeToAutoUMLType(
+
+        //     )
+        // }
+
         const expression = callExpr.expression;
         if (
             ts.isPropertyAccessExpression(expression) ||

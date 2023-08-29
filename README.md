@@ -34,5 +34,5 @@ This project can expand in a few directions. The following are a few directions 
 
 The following is a lsit of currently known issues.
 
--   Type parameters not being used in connections
 -   Empty interfaces are primitives
+-   Type literals are interpreted as \_\_type

@@ -7,6 +7,7 @@ import { MissingArgumentError } from "./ast/MissingArgumentError";
 import {
     PARSE_ARGS_CONFIG,
     generateUsageMessage,
+    DEFAULT_UML_OPTIONS,
 } from "./cli/index";
 
 import { buildUML } from "./cli/buildUML";
@@ -22,6 +23,7 @@ const autoumlExports = {
         PARSE_ARGS_CONFIG,
         generateUsageMessage,
         buildUML,
+        DEFAULT_UML_OPTIONS,
     },
     codegen: {
         Visitor,

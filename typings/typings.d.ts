@@ -4,12 +4,15 @@ import * as util from "node:util";
 export namespace autouml {
     namespace cli {
         interface IOptions {
+            verbose: boolean;
             baseDir: string;
             tsconfigFileName: string;
             outPath: string;
-            target: codegen.Target;
-            verbose: boolean;
+
             debugASTPath: string;
+            includeNodeModules: boolean;
+
+            target: codegen.Target;
         }
         interface IParseArgsConfig
             extends util.ParseArgsConfig {

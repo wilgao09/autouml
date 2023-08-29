@@ -18,6 +18,7 @@ describe("enums are represented properly", () => {
                 target: autouml.codegen.Target.d2,
                 verbose: false,
                 debugASTPath: "./test/enums/debug.ast",
+                includeNodeModules: false,
             }
         );
         let [scopes, conns] = mapper.mapFiles();
@@ -46,6 +47,7 @@ describe("enums are represented properly", () => {
                 target: autouml.codegen.Target.d2,
                 verbose: false,
                 debugASTPath: "./test/enums/debug.ast",
+                includeNodeModules: false,
             }
         );
         let [scopes, conns] = mapper.mapFiles();

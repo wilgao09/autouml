@@ -3,6 +3,9 @@ import { readFileSync } from "fs";
 import { MissingArgumentError } from "./MissingArgumentError";
 import { autouml } from "../../typings/typings";
 import { TypeScraper } from "./TypeScraper";
+import * as os from "node:os";
+import { from_node_modules } from "./helpers";
+import { wellKnownTypesSet } from "./wellknown";
 
 class FileMapper {
     private map: autouml.mapping.IScope;
@@ -71,6 +74,13 @@ class FileMapper {
     }
     public getUMLOptions(): autouml.cli.IOptions {
         return this.umloptions;
+    }
+
+    public getRelations(): Map<
+        string,
+        Map<autouml.mapping.ConnectorType, Set<string>>
+    > {
+        return this.relations;
     }
 
     public getCurrentFileName(): string {
@@ -223,26 +233,40 @@ class FileMapper {
         type: autouml.mapping.ConnectorType,
         dst: autouml.mapping.ITSType
     ) {
-        if (!dst.isPrimitive && !src.isPrimitive) {
-            let srckey = JSON.stringify(src);
-            let dststring = JSON.stringify(dst);
-            // create src
-            if (!this.relations.has(srckey)) {
-                this.relations.set(srckey, new Map());
-            }
-            let connDict = this.relations.get(srckey)!;
-            // create dict if needed
-            if (!connDict.has(type)) {
-                connDict.set(type, new Set());
-            }
-            let dstSet = connDict.get(type)!;
-            // add dst to hash
-            dstSet.add(dststring);
+        if (
+            dst.isPrimitive ||
+            src.isPrimitive ||
+            wellKnownTypesSet.has(src.name) ||
+            wellKnownTypesSet.has(dst.name)
+        ) {
+            return;
+        }
 
-            // check if it has parameters
-            for (let p of dst.typeParameters) {
-                this.addRelation(src, type, p);
-            }
+        if (
+            (from_node_modules(src) ||
+                from_node_modules(dst)) &&
+            !this.umloptions.includeNodeModules
+        ) {
+            return;
+        }
+        let srckey = JSON.stringify(src);
+        let dststring = JSON.stringify(dst);
+        // create src
+        if (!this.relations.has(srckey)) {
+            this.relations.set(srckey, new Map());
+        }
+        let connDict = this.relations.get(srckey)!;
+        // create dict if needed
+        if (!connDict.has(type)) {
+            connDict.set(type, new Set());
+        }
+        let dstSet = connDict.get(type)!;
+        // add dst to hash
+        dstSet.add(dststring);
+
+        // check if it has parameters
+        for (let p of dst.typeParameters) {
+            this.addRelation(src, type, p);
         }
     }
 

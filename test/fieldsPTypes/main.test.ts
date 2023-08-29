@@ -21,6 +21,7 @@ describe("parameters are in all relevant data structures", () => {
                 verbose: false,
                 debugASTPath:
                     "./test/fieldsPTypes/debug.ast",
+                includeNodeModules: false,
             }
         );
         let [scopes, conns] = mapper.mapFiles();
